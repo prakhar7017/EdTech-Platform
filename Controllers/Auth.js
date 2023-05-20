@@ -3,6 +3,7 @@ const User=require("../Models/Users");
 const OTP=require("../Models/otp");
 const otpGenerator = require('otp-generator');
 const bcrypt=require("bcrypt"); 
+const jwt=require("jsonwebtoken");
 const Profile = require("../Models/Profile");
 
 // sendOTP
@@ -145,6 +146,59 @@ exports.postSignup=async (req,res)=>{
 }
 // login
 exports.postLogin=async(req,res)=>{
-    
+    try {
+        // get data
+        const {email,password}=req.body;
+        // validate data
+        if(!email ||!password){
+            return res.status(403).json({
+                success:true,
+                message:"All Fields are Required"
+            })
+        }
+        // user check exist or not
+        const existUser=await User.findOne({email})
+        if(!existUser){
+            return res.status(401).json({
+                success:false,
+                message:"User Not Found"
+            })
+        }
+        // password ko compare kar leya
+        if(await !bcrypt.compare(password,existUser.password)){
+            return res.status(401).json({
+                success:false,
+                message:"Email or Password is Wrong"
+            })
+        }
+        // generate JWT token
+        let payload={
+            email:existUser.email,
+            id:existUser._id,
+            role:existUser.accountType
+        }
+        const token=jwt.sign(payload,process.env.JWT_SECRET,{
+            expiresIn:"2h"
+        })
+        existUser.token=token;
+        existUser.password=undefined;
+        // response
+        let option={
+            expires:new Date(Date.now()+3*24*60*60*1000),
+            httpOnly:true
+        }
+        res.cookie("token",token,option).status(200).json({
+            success:true,
+            token,
+            existingUser,
+            message:"logged in Successfully"
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:"Internal Server Error"
+        })
+    }
 }
 // changePassword 
