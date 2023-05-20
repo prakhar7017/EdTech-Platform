@@ -175,7 +175,7 @@ exports.postLogin=async(req,res)=>{
         let payload={
             email:existUser.email,
             id:existUser._id,
-            role:existUser.accountType
+            accountType:existUser.accountType
         }
         const token=jwt.sign(payload,process.env.JWT_SECRET,{
             expiresIn:"2h"
@@ -202,3 +202,11 @@ exports.postLogin=async(req,res)=>{
     }
 }
 // changePassword 
+exports.postChangePassword=async(req,res)=>{
+//     get data from req
+//     get email,newpassword,oldpassword,confirmpassword,
+//     validator
+//     update pwd in Profile.db
+//     send mail
+//     return res
+}
