@@ -25,9 +25,6 @@ const UserSchema=new mongoose.Schema({
         required:true,
         trim:true,
     },
-    image:{
-        type:String,
-    },
     accountType:{
         type:String,
         required:true,

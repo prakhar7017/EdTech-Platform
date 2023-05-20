@@ -1,6 +1,9 @@
+const { exists } = require("../Models/Profile");
 const User=require("../Models/Users");
 const OTP=require("../Models/otp");
-const otpGenerator = require('otp-generator') 
+const otpGenerator = require('otp-generator');
+const bcrypt=require("bcrypt"); 
+const Profile = require("../Models/Profile");
 
 // sendOTP
 exports.sendOTP=async(req,res)=>{
@@ -58,13 +61,90 @@ exports.sendOTP=async(req,res)=>{
         })
         
     }
-
-
-
-
 }
 // signup
+exports.postSignup=async (req,res)=>{
+   try {
+     //data fetch
+     const {
+        firstName,lastName,email,password,phoneNumber,accountType,confirmPassword,otp
+    }=req.body;
+    // data validate
+    if(!firstName || !lastName || !email || !password || !confirmPassword || !phoneNumber || !otp){
+        return res.status(403).json({
+            success:false,
+            message:"ALL fields are required"
+        })
+    }
+    // 2 password match karlo
+    if(password!==confirmPassword){
+        return res.status(400).json({
+            succes:false,
+            message:"Password and Confirm Password Does not match"
+        })
+    }
+    // check user already exists
+    const existingUser=await User.findOne({email})
 
+    if(existingUser){
+        return res.status(400).json({
+            success:false,
+            message:"User Already exist"
+        })
+    }
+    // find most recent otp
+    const recentOtp=await OTP.findOne({email}).sort({createdAt:-1}).limit(1);
+    console.log(recentOtp);
+    // validate otp
+    if(recentOtp!=otp){
+        return res.status(400).json({
+            succes:false,
+            message:"Invalid OTP"
+        })
+    }else if(recentOtp.length==0){
+        return res.status(400).json({
+            succes:false,
+            message:"OTP Not Found"
+        })
+    }
+    // hash password
+    const hashedPassword=await bcrypt.hash(10,password);
+    if(!hashedPassword){
+        return res.status(400).json({
+            success:false,
+            message:"Password Cannot be Hashed"
+        })
+    }
+    // store in db
+    const profileDetails=await Profile.create({
+        gender:null,
+        dateofBirth:null,
+        about:null,
+        contactNumber:null,
+        profession:null
+    })
+    const user=await User.create({
+        firstName,lastName,email,password:hashedPassword,phoneNumber,accountType,
+        additionalDetails:profileDetails._id,
+        image:`https://api.dicebear.com/6.x/initials/svg?seed=${firstName} ${lastName}`
+
+    })
+    // respone
+    return res.status(201).json({
+        success:true,
+        message:"User is Registered SuccessFully",
+        user
+    })
+   } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+        success:false,
+        message:"Internal Server Error"
+    })
+   }
+}
 // login
-
+exports.postLogin=async(req,res)=>{
+    
+}
 // changePassword 
