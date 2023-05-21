@@ -1,6 +1,6 @@
-const { exists } = require("../Models/Profile");
 const User=require("../Models/Users");
 const OTP=require("../Models/otp");
+const mailSender=require("../util/mailSender");
 const otpGenerator = require('otp-generator');
 const bcrypt=require("bcrypt"); 
 const jwt=require("jsonwebtoken");
@@ -165,7 +165,7 @@ exports.postLogin=async(req,res)=>{
             })
         }
         // password ko compare kar leya
-        if(await !bcrypt.compare(password,existUser.password)){
+        if(!bcrypt.compare(password,existUser.password)){
             return res.status(401).json({
                 success:false,
                 message:"Email or Password is Wrong"
@@ -175,7 +175,7 @@ exports.postLogin=async(req,res)=>{
         let payload={
             email:existUser.email,
             id:existUser._id,
-            accountType:existUser.accountType
+            accountType :existUser.accountType
         }
         const token=jwt.sign(payload,process.env.JWT_SECRET,{
             expiresIn:"2h"
@@ -203,10 +203,47 @@ exports.postLogin=async(req,res)=>{
 }
 // changePassword 
 exports.postChangePassword=async(req,res)=>{
-//     get data from req
-//     get email,newpassword,oldpassword,confirmpassword,
-//     validator
-//     update pwd in Profile.db
-//     send mail
-//     return res
+    try {
+        const {email,oldPassword,newPassword,confirmPassword}=req.body;
+
+        if(!email || !oldPassword || !newPassword || !confirmPassword){
+            return res.status(403).json({
+                success:false,
+                message:"All fields are required"
+            })
+        }
+        if(newPassword!==confirmPassword){
+            return res.status(400).json({
+                success:false,
+                message:"Password and ConfirmPassword  Does Not Match"
+            })
+        }
+        const prevUser=User.findOne({email});
+        const prevPassword=prevUser.password;
+
+        if(!bcrypt.compare(oldPassword,prevPassword)){
+            return res.status(400).json({
+                success:false,
+                message:"Old Password Doest not Match"
+            })
+        }
+
+        const newHashPassword=bcrypt.hash(10,newPassword);
+        const updatedUser=await User.findOneAndUpdate({email},{$set:{password:newHashPassword}},{new:true});
+
+        await mailSender(email,"Password Changed Successfully","Successful")
+
+        res.status(200).json({
+            success:true,
+            message:"Password Changed Successfully",
+            updatedUser
+        })
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:"Internal Server Error"
+        })
+    }
 }
