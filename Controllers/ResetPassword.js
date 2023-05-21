@@ -1,5 +1,6 @@
 const User=require("../Models/Users");
 const mailSender=require("../util/mailSender");
+const bcrypt=require("bcrypt")
 
 exports.resetPasswordToken=async (req,res)=>{
     try {
@@ -38,11 +39,53 @@ exports.resetPasswordToken=async (req,res)=>{
         })
     }
 }
-// link generation and then resetPassword
-// get email
-// email exist and validate
-// generate Token
-// update user with adding Token and expiration
-// create url
-// send mail
-// response
+
+exports.resetPassword=async(req,res)=>{
+    try {
+        const {newPassword,confirmPassword,token}=req.body;
+        if(!token){
+            return res.status(404).json({
+                success:false,
+                message:"Token Does not found",
+            })
+        }
+        if(newPassword!==confirmPassword){
+            return res.status(400).json({
+                success:false,
+                message:"New Password and Confirm Password Does not Match",
+            })
+        }
+
+        const user=await User.findOne({token});
+
+        if(!user){
+            return res.status(403).json({
+                success:false,
+                message:"Invalid Token"
+            })
+        }
+
+        if(user.resetPasswordExpire < Date.now()){
+            return res.status(400).json({
+                success:false,
+                message:"Token has been expired Generate a new Token"
+            })
+        }
+
+        const newhashPassword=bcrypt.hash(10,newPassword);
+
+        const updatedUser=await User.findOneAndUpdate({token},{password:newhashPassword},{new:true})
+
+        return res.status(200).json({
+            success:true,
+            message:"Password Reset SuccessFully",
+            updatedUser
+        })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success:false,
+            message:"Internal Server Error"
+        })
+    }
+}
