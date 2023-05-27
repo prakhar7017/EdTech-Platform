@@ -26,7 +26,35 @@ exports.createSection=async (req,res)=>{
     } catch (error) {
         return res.status(500).json({
             success:false,
-            message:"Unable to Create Section"
+            message:"Unable to Create Section",
+            error:error.message
+        })
+    }
+}
+
+exports.updateSection=async (req,res)=>{
+    try {
+        const {sectionName,sectionId}=req.body;
+        if(!sectionName || !sectionId){
+            return res.status(400).json({
+                success:false,
+                message:"All fields are required"
+            })
+        }
+        const section=await Section.findByIdAndUpdate({_id:sectionId},{sectionName:sectionName},{new:true});
+
+        return res.status(200).json({
+            success:true,
+            message:"secction updated Successfully",
+            section
+
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"Unable to Update Section",
+            error:error.message
         })
     }
 }
