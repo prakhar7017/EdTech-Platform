@@ -20,10 +20,10 @@ exports.updateProfile=async (req,res)=>{
             })
         }
 
-        const userDetails=await User.findById({_id:userId});
-        const profileId=userDetails.additionalDetails;
-        const profileDetails=await Profile.findById({_id:profileId});
-
+        // const userDetails=await User.findById({_id:userId});
+        // const profileId=userDetails.additionalDetails;
+        // const profileDetails=await Profile.findById({_id:profileId});
+        const profileDetails=await User.findById({_id:userId}).populate("additionalDetails").select("additionalDetails")
         profileDetails.gender=gender;        
         profileDetails.dateofBirth=DOB;        
         profileDetails.about=about;        
