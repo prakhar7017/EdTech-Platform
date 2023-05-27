@@ -47,13 +47,35 @@ exports.updateSection=async (req,res)=>{
             success:true,
             message:"secction updated Successfully",
             section
-
         })
 
     } catch (error) {
         return res.status(500).json({
             success:false,
             message:"Unable to Update Section",
+            error:error.message
+        })
+    }
+}
+
+exports.deleteSection=async (req,res)=>{
+    try {
+        const {sectionId}=req.body;
+        if(!sectionId){
+            return res.status(400).json({
+                success:false,
+                message:"SectionId is missing"
+            })
+        }
+        const deleteCourse=await Section.findByIdAndDelete({_id:sectionId})
+        return res.status(200).json({
+            success:true,
+            message:"Section Deleted Successfully"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"Unable to Delete Section",
             error:error.message
         })
     }
