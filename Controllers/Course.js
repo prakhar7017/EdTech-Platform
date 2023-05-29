@@ -1,24 +1,28 @@
 const Course=require("../Models/Course");
-const Tag=require("../Models/Tag");
+const Category=require("../Models/Category");
 const User=require("../Models/Users");
 const uploadImageToCloud=require("../util/imageUploder");
 
 
 exports.createCourse=async (req,res)=>{
     try {
-        const {courseName,courseDescription,whatYouWillLearn,price,tag}=req.body;
+        const {courseName,courseDescription,whatYouWillLearn,price,tag,category,status,instructions}=req.body;
 
         const thumbNail=req.files.thumbnailImage;
 
-        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag){
+        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !thumbNail || !category){
             return res.status(400).json({
                 success:false,
                 message:"all fields are required"
             })
         }
 
+        if (!status || status === undefined) {
+			status = "Draft";
+		}
+
         const userId=req.user.id;
-        const instructorDetails=await User.findById({_id:userId});
+        const instructorDetails=await User.findById({_id:userId},{accountType:"Instructor"});
 
         if(!instructorDetails){
             return res.status(404).json({
@@ -27,12 +31,12 @@ exports.createCourse=async (req,res)=>{
             })
         }
 
-        const tagDetails=await Tag.findById({_id:tag});
+        const categoryDetails=await Category.findById({_id:tag});
 
-        if(!tagDetails){
+        if(!categoryDetails){
             return res.status(404).json({
                 success:false,
-                message:"Tag Not Found"
+                message:"Category Not Found"
             })
         }
 
@@ -45,14 +49,18 @@ exports.createCourse=async (req,res)=>{
             whatYouWillLearn:whatYouWillLearn,
             price:price,
             thumbnail:uploadImage.secure_url,
-            tags:tagDetails._id,
+            tags:tag,
+            category:categoryDetails._id,
+            status:status,
+            instructions:instructions
+
         })
 
         //add the course to userSchema
         await User.findByIdAndUpdate({_id:instructorDetails._id},{$push:{courses:newCourse._id}},{new:true});
 
         // add course in Tag schema 
-        await Tag.findByIdAndUpdate({_id:tagDetails._id},{$push:{course:newCourse._id}},{new:true});
+        await Category.findByIdAndUpdate({_id:categoryDetails._id},{$push:{course:newCourse._id}},{new:true});
 
         return res.status(201).json({
             success:true,
