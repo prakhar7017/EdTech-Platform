@@ -74,3 +74,53 @@ exports.capturePayment=async(req,res)=>{
         })
     }
 }
+
+exports.verifySignature=async(req,res)=>{
+    try {
+        const webHook="12345"
+        const signature=req.headers("x-razorpay-signature");
+
+        const crypt=crypto.createHmac("sha256",webHook);
+        crypt.update(JSON.stringify(req.body));
+        const digest=crypt.digest("hex");
+
+        if(signature===digest){
+            const {courseId,userId}=req.body.payload.payment.entity.notes;
+
+            const enrolledstudent=await User.findByIdAndUpdate({_id:userId},{$push:{courses:courseId}},{new:true});
+
+            if(!enrolledstudent){
+                return res.status(400).json({
+                    success:false,
+                    message:"Student not found"
+                })
+            }
+            const enrolledCourse=await Course.findByIdAndUpdate({_id:courseId},{$push:{studentEnrolled:userId}},{new:true});
+
+            if(!enrolledCourse){
+                return res.status(400).json({
+                    success:false,
+                    message:"Course not found"
+                })
+            }
+
+            const mailsend=await mailSender(enrolledstudent.email,"congratulations","successfully Inrolled");
+
+            return res.status(200).json({
+                success:false,
+                message:"signature verified"
+            })
+        }else{
+            return res.status(400).json({
+                success:false,
+                message:"verification failed"
+            })
+        }
+        
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"verification not able"
+        })
+    }
+}
