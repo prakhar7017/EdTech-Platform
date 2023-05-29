@@ -20,16 +20,23 @@ const UserSchema=new mongoose.Schema({
         type:String,
         required:true,
     },
-    phoneNumber:{
-        type:Number,
-        required:true,
-        trim:true,
-    },
     token:{
         type:String,
     },
     resetPasswordExpire:{
         type:Date
+    },
+    active: {
+        type: Boolean,
+        default: true,
+    },
+    approved: {
+        type: Boolean,
+        default: true,
+    },
+    image: {
+        type: String,
+        required: true,
     },
     accountType:{
         type:String,
@@ -49,6 +56,6 @@ const UserSchema=new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"CourseProgres"
     }],
-})
+},{timestamps:true})
 
 module.exports=mongoose.model("User",UserSchema);
