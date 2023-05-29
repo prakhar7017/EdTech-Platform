@@ -1,5 +1,6 @@
 const Profile=require("../Models/Profile")
 const User=require("../Models/Users");
+const Course=require("../Models/Course");
 
 exports.updateProfile=async (req,res)=>{
      try {
@@ -65,8 +66,9 @@ exports.deleteAccount=async(req,res)=>{
             })
         }
 
-        await Profile.findByIdAndDelete({_id:userId.additionalDetails})
-
+        await Profile.findByIdAndDelete({_id:userId.additionalDetails});
+        // await Course.findByIdAndDelete({})
+        // hw to detele course s
         await User.findByIdAndDelete({_id:userId});
 
     } catch (error) {

@@ -40,6 +40,12 @@ exports.createSubSection=async (req,res)=>{
 }
 
 exports.updateSubSection=async(req,res)=>{
+    try {
+        const {title="",duration="",description="",sectionId}=req.body;
+
+    } catch (error) {
+        
+    }
 
 }
 
