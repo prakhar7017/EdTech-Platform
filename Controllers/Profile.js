@@ -70,7 +70,11 @@ exports.deleteAccount=async(req,res)=>{
         // await Course.findByIdAndDelete({})
         // hw to detele course s
         const allEnrolledCourses=await User.findById({_id:userId.courses}).select("courses");
-        await Course.findByIdAndUpdate({_id:allEnrolledCourses},{$pull:{studentEnrolled:userId}})
+        allEnrolledCourses.forEach(async (element) => {
+            await Course.findByIdAndUpdate({_id:element},{$pull:{studentEnrolled:userId}})
+        });
+            
+        
         await User.findByIdAndDelete({_id:userId});
 
     } catch (error) {
