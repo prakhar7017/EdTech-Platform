@@ -69,6 +69,8 @@ exports.deleteAccount=async(req,res)=>{
         await Profile.findByIdAndDelete({_id:userId.additionalDetails});
         // await Course.findByIdAndDelete({})
         // hw to detele course s
+        const allEnrolledCourses=await User.findById({_id:userId.courses}).select("courses");
+        await Course.findByIdAndUpdate({_id:allEnrolledCourses},{$pull:{studentEnrolled:userId}})
         await User.findByIdAndDelete({_id:userId});
 
     } catch (error) {
