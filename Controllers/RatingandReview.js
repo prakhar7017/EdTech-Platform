@@ -76,9 +76,33 @@ exports.getAverageRating=async (req,res)=>{
             })
         }
     } catch (error) {
-        return res.status(200).json({
+        return res.status(500).json({
             success:false,
             message:"failed to get average Rating",
+            error:error.message
+        })
+    }
+}
+
+exports.getAllRandR=async(req,res)=>{
+    try {
+        const allRatingAndReview=await RandR.find({}).sort({rating:-1}).populate({
+            path:"user",
+            select:"firstName,lastName,email,image"}
+        ).populate({
+            path:"course",
+            select:"courseName",
+        }).exec();
+
+        return res.status(200).json({
+            success:true,
+            message:"all rating fetched successfully",
+            allRatingAndReview
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"failed to get Rating",
             error:error.message
         })
     }
