@@ -103,3 +103,47 @@ exports.getAllCourse=async(req,res)=>{
         })
     }
 }
+
+exports.getCourseDetails=async (req,res)=>{
+    try {
+        const {courseId}=req.body;
+        if(!courseId){
+            return res.status(400).json({
+                success:false,
+                message:"Course Id not found"
+            })
+        }
+        const courseDetails=await Course.find({_id:courseId}).populate({
+            path:"instructor",
+            populate:{
+                path:"additionalDetails"
+            }
+        }).populate("category").populate("ratingAndReviews").populate({
+            path:"courseContent",
+            populate:{
+                path:"subSection"
+            }
+        }).exec();
+
+        if(!courseDetails){
+            return res.status(400).json({
+                success:false,
+                message:"Could not found course"
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"Course founded Successfully"
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"failed to get Course",
+            error:error.message
+        })
+    }
+
+
+}
