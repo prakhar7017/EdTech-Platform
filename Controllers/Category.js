@@ -84,4 +84,4 @@ exports.categoryPagedetails=async (req,res)=>{
             error:error.message
         })
     }
-}
+} 
