@@ -131,3 +131,28 @@ exports.updateDisplayPicture=async (req,res)=>{
           })
     }
 }
+
+exports.getEnrolledCourses=async (req,res)=>{
+    try {
+        const userId=req.user.id;
+        const allCourses=await User.findOne({_id:userId}).populate("course").select("course").exec();
+
+        if(!allCourses){
+            return res.status(400).json({
+                success:false,
+                message:"cannot get enrolled courses"
+            })
+        }
+
+        return res.status(200).json({
+            success:false,
+            message:"enrolled courses fetched successfully",
+            allCourses
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+          })
+    }
+}
