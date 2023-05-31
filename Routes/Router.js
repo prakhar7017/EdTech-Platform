@@ -7,10 +7,10 @@ const Payment_router=require("./Payment");
 const Course_router=require("./Course");
 
 
-router.use("/",User_router)
-router.use("/",Profile_router)
-router.use("/",Payment_router)
-router.use("/",Course_router)
+router.use("/api/v1/auth",User_router)
+router.use("/api/v1/profile",Profile_router)
+router.use("/api/v1/payment",Payment_router)
+router.use("/api/v1/course",Course_router)
 
 
 module.exports=router;
