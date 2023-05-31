@@ -1,6 +1,7 @@
 const Profile=require("../Models/Profile")
 const User=require("../Models/Users");
 const Course=require("../Models/Course");
+const uplaodToCloudinary=require("../util/imageUploder");
 
 exports.updateProfile=async (req,res)=>{
      try {
@@ -108,5 +109,25 @@ exports.getAllUserDetails=async (req,res)=>{
             success:false,
             message:"fetching user details failed"
         })
+    }
+}
+exports.updateDisplayPicture=async (req,res)=>{
+    try {
+        const displayPicture=req.files.displayPicture;
+        const userId=req.user.id;
+        const image=await uplaodToCloudinary(displayPicture,process.env.FOLDER_NAME,1000,1000)
+
+        const updateProfile=await Profile.findByIdAndUpdate({_id:userId},{image:image.secure_url},{new_true});
+
+        return res.status(200).json({
+            success:true,
+            message:"Profile Picture Update Successfully",
+            updateProfile
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+          })
     }
 }
