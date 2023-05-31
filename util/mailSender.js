@@ -14,7 +14,7 @@ const mailSender=async(email,title,body)=>{
         })
 
         let info=await transpoter.sendMail({
-            from:process.env.MAIL_From,
+            from:"StudyNotion",
             to:`${email}`,
             subject:`${title}`,
             html:`${body}`,

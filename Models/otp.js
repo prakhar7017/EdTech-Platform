@@ -28,8 +28,10 @@ async function sendVerification(email,otp){
     }
 }
 
-otpSchema.pre("save",async (next)=>{
-    await sendVerification(this.email,this.otp);
+otpSchema.pre("save",async function(next){
+    if(this.isNew){
+        await sendVerification(this.email,this.otp);
+    }
     next();
 })
 

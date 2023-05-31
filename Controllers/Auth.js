@@ -20,7 +20,7 @@ exports.sendOTP=async(req,res)=>{
             })
         }
         // otp generate
-        let otp=otpGenerator(6,{
+        let otp=otpGenerator.generate(6,{
             upperCaseAlphabets:false,
             lowerCaseAlphabets:false,
             specialChars:false,
@@ -33,7 +33,7 @@ exports.sendOTP=async(req,res)=>{
         })
 
         while(otp_ifPresent){
-            otp=otpGenerator(6,{
+            otp=otpGenerator.generate(6,{
                 upperCaseAlphabets:false,
                 lowerCaseAlphabets:false,
                 specialChars:false,

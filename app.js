@@ -3,7 +3,8 @@ const express=require("express");
 const app=express();
 const cookieParser=require("cookie-parser");
 const cors=require("cors");
-const fileUpload=require("express-fileupload")
+const fileUpload=require("express-fileupload");
+const morgan=require("morgan");
 
 const PORT=process.env.PORT || 8000;
 const db=require("./Configs/Database");
@@ -12,7 +13,7 @@ const Cloudinary=require("./Configs/Cloudinary");
 
 
 
-
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(Routes);
 app.use(cookieParser());

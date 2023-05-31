@@ -8,7 +8,7 @@ router.post("/login",auth_controller.postLogin);
 
 router.post("/signup",auth_controller.postSignup);
 
-router.post("./sendotp",auth_controller.sendOTP);
+router.post("/sendotp",auth_controller.sendOTP);
 
 router.post("/changepassword",auth_controller.postChangePassword);
 
