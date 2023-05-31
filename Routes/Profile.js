@@ -5,13 +5,15 @@ const auth_middleware=require("../Middlewares/Auth");
 
 
 
-router.delete("/deleteProfile",profile_controller.deleteAccount)
+router.delete("/deleteProfile",auth_middleware.isAuthenticated,profile_controller.deleteAccount)
 
-router.put("/updateProfile",profile_controller.updateProfile);
+router.put("/updateProfile",auth_middleware.isAuthenticated,profile_controller.updateProfile);
 
-router.get("/getUserDetails",profile_controller.getAllUserDetails);
+router.get("/getUserDetails",auth_middleware.isAuthenticated,profile_controller.getAllUserDetails);
 
-router.get("/updateDisplayPicture",profile_controller)
+router.put("/updateDisplayPicture",auth_middleware.isAuthenticated,profile_controller.updateDisplayPicture);
+
+router.get("/getEnrolledCourses",auth_middleware.isAuthenticated,profile_controller.getEnrolledCourses)
 
 
 
