@@ -4,27 +4,27 @@ const uplodeToCloudinary=require("../util/imageUploder");
 
 exports.createSubSection=async (req,res)=>{
     try {
-        const {title,duration,description,sectionId}=req.body;
+        const {title,timeDuration,description,sectionId}=req.body;
 
-        const video=req.files.videoFile;
+        const videoFile=req.files.videoFile;
 
-        if(!title || !duration || !description || !sectionId || !video){
+        if(!title || !timeDuration || !description || !sectionId || !videoFile){
             return res.status(400).json({
                 success:false,
                 message:"All fields are required"
             })
         }
 
-        const uploadVideo=await uplodeToCloudinary(video,process.env.FOLDER_NAME);
+        const uploadVideo=await uplodeToCloudinary.uploadImageToCloud(videoFile,process.env.FOLDER_NAME);
 
         const subSectionDetails=await SubSection.create({
             title:title,
-            timeDuration:duration,
+            timeDuration:timeDuration,
             description:description,
             videoUrl:uploadVideo.secure_url,
         })
 
-        const updateSection=await Section.findByIdAndUpdate({_id:sectionId},{$push:{subSection:subSectionDetails._id}},{new:true}).populate("SubSection");
+        const updateSection=await Section.findByIdAndUpdate({_id:sectionId},{$push:{subSection:subSectionDetails._id}},{new:true}).populate("subSection");
 
         return res.status(201).json({
             message:"SubSection created SuccessFully",
@@ -32,6 +32,7 @@ exports.createSubSection=async (req,res)=>{
             updateSection
         })
     } catch (error) {
+      console.log(error)
         return res.status(500).json({
             success:false,
             message:"Unable to add SubSection"
@@ -59,7 +60,7 @@ exports.updateSubSection=async(req,res)=>{
         }
         if(req.files && req.files.video !== undefined){
             const video=req.files.video;
-            const uplaodDetails=await uplodeToCloudinary(video,process.env.FOLDER_NAME);
+            const uplaodDetails=await uplodeToCloudinary.uploadImageToCloud(video,process.env.FOLDER_NAME);
             subSection.videoUrl=uplaodDetails.secure_url;
             subSection.timeDuration=uplaodDetails.duration
         }

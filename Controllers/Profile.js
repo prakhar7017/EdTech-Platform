@@ -5,7 +5,7 @@ const uplaodToCloudinary=require("../util/imageUploder");
 
 exports.updateProfile=async (req,res)=>{
      try {
-        const {gender="",DOB="",about="",contactNumber="",profession=""}=res.body;
+        const {gender="",dateOfBirth="",about="",contactNumber="",profession=""}=req.body;
 
         const userId=req.user.id;
 
@@ -22,12 +22,12 @@ exports.updateProfile=async (req,res)=>{
             })
         }
 
-        // const userDetails=await User.findById({_id:userId});
-        // const profileId=userDetails.additionalDetails;
-        // const profileDetails=await Profile.findById({_id:profileId});
-        const profileDetails=await User.findById({_id:userId}).populate("additionalDetails").select("additionalDetails")
+        const userDetails=await User.findById({_id:userId});
+        const profileid=userDetails.additionalDetails;
+        const profileDetails=await Profile.findById({_id:profileid});
+
         profileDetails.gender=gender;        
-        profileDetails.dateofBirth=DOB;        
+        profileDetails.dateofBirth=dateOfBirth;        
         profileDetails.about=about;        
         profileDetails.contactNumber=contactNumber;        
         profileDetails.profession=profession;     
@@ -42,7 +42,7 @@ exports.updateProfile=async (req,res)=>{
      } catch (error) {
         return res.status(500).json({
             success:false,
-            message:"unable to delete Profile",
+            message:"unable to update Profile",
             error:error.message
         })
      }
@@ -59,7 +59,6 @@ exports.deleteAccount=async(req,res)=>{
         }
 
         const userExist=await User.findById({_id:userId});
-
         if(!userExist){
             return res.status(404).json({
                 success:false,
@@ -67,16 +66,19 @@ exports.deleteAccount=async(req,res)=>{
             })
         }
 
-        await Profile.findByIdAndDelete({_id:userId.additionalDetails});
+        const profile=await Profile.findByIdAndDelete({_id:userExist.additionalDetails});
         // await Course.findByIdAndDelete({})
         // hw to detele course s
-        const allEnrolledCourses=await User.findById({_id:userId.courses}).select("courses");
-        allEnrolledCourses.forEach(async (element) => {
+        const allEnrolledCourses=await User.findById({_id:userId}).select("courses");
+        console.log(allEnrolledCourses.courses);
+        allEnrolledCourses.courses.forEach(async (element) => {
             await Course.findByIdAndUpdate({_id:element},{$pull:{studentEnrolled:userId}})
         });
-            
-        
         await User.findByIdAndDelete({_id:userId});
+        return res.status(200).json({
+            succes:true,
+            message:"account deleted successfully"
+        })
 
     } catch (error) {
         return res.status(500).json({
@@ -100,7 +102,8 @@ exports.getAllUserDetails=async (req,res)=>{
 
         return res.status(200).json({
             success:true,
-            message:"User Data Fetched"
+            message:"User Data Fetched",
+            data:userDetails,
         })
 
         
@@ -115,9 +118,10 @@ exports.updateDisplayPicture=async (req,res)=>{
     try {
         const displayPicture=req.files.displayPicture;
         const userId=req.user.id;
-        const image=await uplaodToCloudinary(displayPicture,process.env.FOLDER_NAME,1000,1000)
+        const image=await uplaodToCloudinary.uploadImageToCloud(displayPicture,process.env.FOLDER_NAME,1000,1000)
 
-        const updateProfile=await Profile.findByIdAndUpdate({_id:userId},{image:image.secure_url},{new_true});
+        const updateProfile=await User.findByIdAndUpdate({_id:userId},{image:image.secure_url},{new:true});
+        console.log(updateProfile)
 
         return res.status(200).json({
             success:true,
@@ -125,6 +129,7 @@ exports.updateDisplayPicture=async (req,res)=>{
             updateProfile
         })
     } catch (error) {
+        console.log(error)
         return res.status(500).json({
             success: false,
             message: error.message,

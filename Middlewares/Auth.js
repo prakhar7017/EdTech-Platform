@@ -4,7 +4,7 @@ const User=require("../Models/Users");
 
 //auth
 exports.isAuthenticated=async (req,res,next)=>{
-    try {
+    try {       
         const token=req.cookies.token || req.body.token || req.get("Authorization").split(" ")[1];
         if(!token){
             return res.status(401).json({
@@ -25,9 +25,9 @@ exports.isAuthenticated=async (req,res,next)=>{
         }
         next();
     } catch (error) {
-        return res.status(500).json({
+        return res.status(401).json({
             succes:false,
-            message :"internal server error"
+            message :"something went wrong"
         })
     }
 }

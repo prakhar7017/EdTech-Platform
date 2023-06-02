@@ -12,5 +12,5 @@ exports.uploadImageToCloud=async(file,folder,height,quality)=>{
     option.resource_type="auto";
 
 
-    return await cloudinary.uploader.upload(file,tempFilePath,option);
+    return await cloudinary.uploader.upload(file.tempFilePath,option);
 }

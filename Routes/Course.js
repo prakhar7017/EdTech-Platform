@@ -25,18 +25,18 @@ router.post("/addSubSection",auth_middleware.isAuthenticated,auth_middleware.isI
 
 router.post("/updateSubSection",auth_middleware.isAuthenticated,auth_middleware.isInstructor,subsection_controller.updateSubSection);
 
-router.post("/delteSubSection",auth_middleware.isAuthenticated,auth_middleware.isInstructor,subsection_controller.deleteSubSection);
+router.post("/deleteSubSection",auth_middleware.isAuthenticated,auth_middleware.isInstructor,subsection_controller.deleteSubSection);
 
 router.get("/getAllCourses",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getAllCourse);
 
-router.get("getAllCoursesDetails",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getCourseDetails);
+router.get("/getFullCourseDetails",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getCourseDetails);
 
 
 router.post("/createCategory",auth_middleware.isAuthenticated,auth_middleware.isAdmin,category_controller.createCategory);
 
-router.post("/showAllCategories",auth_middleware.isAuthenticated,auth_middleware.isAdmin,category_controller.getAllCategory);
+router.get("/showAllCategories",auth_middleware.isAuthenticated,auth_middleware.isAdmin,category_controller.getAllCategory);
 
-router.get("/getCategoryPageDetails",auth_middleware.isAuthenticated,auth_middleware.isAdmin,category_controller.categoryPagedetails);
+router.get("/categoryPageDetails",auth_middleware.isAuthenticated,auth_middleware.isAdmin,category_controller.categoryPagedetails);
 
 
 router.post("/createRating",auth_middleware.isAuthenticated,auth_middleware.isStudent,ratingandreview_controller.createRatingandReview)

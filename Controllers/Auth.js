@@ -26,7 +26,6 @@ exports.sendOTP=async(req,res)=>{
             specialChars:false,
             digits:true,
         })
-        console.log("otp generated: ",otp);
 
         const otp_ifPresent=await OTP.findOne({
             otp:otp
@@ -48,7 +47,6 @@ exports.sendOTP=async(req,res)=>{
             email,
             otp,
         })
-        console.log(otp_doc);
 
         res.status(200).json({
             success:true,
@@ -68,10 +66,11 @@ exports.postSignup=async (req,res)=>{
    try {
      //data fetch
      const {
-        firstName,lastName,email,password,phoneNumber,accountType,confirmPassword,otp
+        firstName,lastName,email,password,accountType,confirmPassword,otp
     }=req.body;
+        console.log(otp);
     // data validate
-    if(!firstName || !lastName || !email || !password || !confirmPassword || !phoneNumber || !otp){
+    if(!firstName || !lastName || !email || !password || !confirmPassword || !otp ||   !accountType){
         return res.status(403).json({
             success:false,
             message:"ALL fields are required"
@@ -97,19 +96,19 @@ exports.postSignup=async (req,res)=>{
     const recentOtp=await OTP.findOne({email}).sort({createdAt:-1}).limit(1);
     console.log(recentOtp);
     // validate otp
-    if(recentOtp!=otp){
+    if(recentOtp.otp!=otp){
         return res.status(400).json({
             succes:false,
             message:"Invalid OTP"
         })
-    }else if(recentOtp.length==0){
+    }else if(recentOtp.otp.length==0){
         return res.status(400).json({
             succes:false,
             message:"OTP Not Found"
         })
     }
     // hash password
-    const hashedPassword=await bcrypt.hash(10,password);
+    const hashedPassword=await bcrypt.hash(password,10);
     if(!hashedPassword){
         return res.status(400).json({
             success:false,
@@ -125,7 +124,7 @@ exports.postSignup=async (req,res)=>{
         profession:null
     })
     const user=await User.create({
-        firstName,lastName,email,password:hashedPassword,phoneNumber,accountType,
+        firstName,lastName,email,password:hashedPassword,accountType,
         additionalDetails:profileDetails._id,
         image:`https://api.dicebear.com/6.x/initials/svg?seed=${firstName} ${lastName}`
 
@@ -140,7 +139,8 @@ exports.postSignup=async (req,res)=>{
     console.log(error);
     return res.status(500).json({
         success:false,
-        message:"Internal Server Error"
+        message:"Internal Server Error",
+
     })
    }
 }
@@ -165,7 +165,7 @@ exports.postLogin=async(req,res)=>{
             })
         }
         // password ko compare kar leya
-        if(!bcrypt.compare(password,existUser.password)){
+        if(! await bcrypt.compare(password,existUser.password)){
             return res.status(401).json({
                 success:false,
                 message:"Email or Password is Wrong"
@@ -190,7 +190,7 @@ exports.postLogin=async(req,res)=>{
         res.cookie("token",token,option).status(200).json({
             success:true,
             token,
-            existingUser,
+            existUser,
             message:"logged in Successfully"
         })
     } catch (error) {

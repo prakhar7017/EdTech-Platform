@@ -6,10 +6,8 @@ const uploadImageToCloud=require("../util/imageUploder");
 
 exports.createCourse=async (req,res)=>{
     try {
-        const {courseName,courseDescription,whatYouWillLearn,price,tag,category,status,instructions}=req.body;
-
+        let {courseName,courseDescription,whatYouWillLearn,price,tag,category,status,instructions}=req.body;
         const thumbNail=req.files.thumbnailImage;
-
         if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !thumbNail || !category){
             return res.status(400).json({
                 success:false,
@@ -20,7 +18,6 @@ exports.createCourse=async (req,res)=>{
         if (!status || status === undefined) {
 			status = "Draft";
 		}
-
         const userId=req.user.id;
         const instructorDetails=await User.findById({_id:userId},{accountType:"Instructor"});
 
@@ -30,8 +27,7 @@ exports.createCourse=async (req,res)=>{
                 message:"Instructor Not Found"
             })
         }
-
-        const categoryDetails=await Category.findById({_id:tag});
+        const categoryDetails=await Category.findById({_id:category});
 
         if(!categoryDetails){
             return res.status(404).json({
@@ -39,8 +35,7 @@ exports.createCourse=async (req,res)=>{
                 message:"Category Not Found"
             })
         }
-
-        const uploadImage=await uploadImageToCloud(thumbNail,process.env.FOLDER_NAME);
+        const uploadImage=await uploadImageToCloud.uploadImageToCloud(thumbNail,process.env.FOLDER_NAME);
 
         const newCourse=await Course.create({
             courseName:courseName,
@@ -93,8 +88,6 @@ exports.getAllCourse=async(req,res)=>{
             message:"All Courses Fetched",
             data:allCourse
         })
-
-
     } catch (error) {
         return res.status(500).json({
             success:false,
@@ -134,7 +127,8 @@ exports.getCourseDetails=async (req,res)=>{
 
         return res.status(200).json({
             success:true,
-            message:"Course founded Successfully"
+            message:"Course founded Successfully",
+            courseDetails
         })
 
     } catch (error) {

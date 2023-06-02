@@ -1,5 +1,6 @@
 const User=require("../Models/Users");
 const mailSender=require("../util/mailSender");
+const crypto=require("crypto");
 const bcrypt=require("bcrypt")
 
 exports.resetPasswordToken=async (req,res)=>{
@@ -42,14 +43,14 @@ exports.resetPasswordToken=async (req,res)=>{
 
 exports.resetPassword=async(req,res)=>{
     try {
-        const {newPassword,confirmPassword,token}=req.body;
+        const {password,confirmPassword,token}=req.body;
         if(!token){
             return res.status(404).json({
                 success:false,
                 message:"Token Does not found",
             })
         }
-        if(newPassword!==confirmPassword){
+        if(password!==confirmPassword){
             return res.status(400).json({
                 success:false,
                 message:"New Password and Confirm Password Does not Match",
@@ -72,7 +73,7 @@ exports.resetPassword=async(req,res)=>{
             })
         }
 
-        const newhashPassword=bcrypt.hash(10,newPassword);
+        const newhashPassword=await bcrypt.hash(password,10);
 
         const updatedUser=await User.findOneAndUpdate({token},{password:newhashPassword},{new:true})
 
