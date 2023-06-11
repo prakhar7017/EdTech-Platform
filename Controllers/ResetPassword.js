@@ -28,7 +28,7 @@ exports.resetPasswordToken=async (req,res)=>{
         await mailSender(email,"Password Reset Link",`Here is the Link:${url}`)
 
         return res.status(200).json({
-            success:false,
+            success:true,
             message:"Reset Password Email Sended",
             updatedUser
         })
