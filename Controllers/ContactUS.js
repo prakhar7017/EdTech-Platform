@@ -1,9 +1,9 @@
-const {mailSender}=require(".././util/mailSender")
+const mailSender=require(".././util/mailSender")
 
-exports.ContactUS=async(res,res)=>{
+exports.ContactUS=async(req,res)=>{
     const {firstname,lastname="",email,phoneNo,message}=req.body;
 
-    if(!firstname || !email || phoneNo || message){
+    if(!firstname || !email || !phoneNo || !message){
         return res.status(400).json({
             success:false,
             message:"Please Provide All fields"

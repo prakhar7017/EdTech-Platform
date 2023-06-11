@@ -2,7 +2,6 @@ const express=require("express");
 const router=express.Router();
 const auth_controller=require("../Controllers/Auth");
 const reset_controller=require("../Controllers/ResetPassword");
-const contactus_controller=require("../Controllers/ContactUS")
 const auth_middleware=require("../Middlewares/Auth");
 
 router.post("/login",auth_controller.postLogin);
@@ -17,6 +16,6 @@ router.post("/reset-password-token",reset_controller.resetPasswordToken);
 
 router.post("/reset-password",reset_controller.resetPassword);
 
-router.post("/reach/contact",contactus_controller.ContactUS);
+
 
 module.exports=router;
