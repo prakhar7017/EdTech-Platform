@@ -27,14 +27,14 @@ exports.resetPasswordToken=async (req,res)=>{
 
         await mailSender(email,"Password Reset Link",`Here is the Link:${url}`)
 
-        return res.status(200).json({
+        res.status(200).json({
             success:true,
             message:"Reset Password Email Sended",
             updatedUser
         })
     } catch (error) {
         console.log(error);
-        return res.status(500).json({
+        res.status(500).json({
             success:false,
             message:"Internal Server Error"
         })

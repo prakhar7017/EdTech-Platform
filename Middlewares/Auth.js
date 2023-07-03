@@ -5,16 +5,17 @@ const User=require("../Models/Users");
 //auth
 exports.isAuthenticated=async (req,res,next)=>{
     try {       
-        const token=req.cookies.token || req.body.token || req.get("Authorization").split(" ")[1];
+        const token= req.cookies.token || req.body.token || req.get("Authorization").replace("Bearer ","");
+        console.log("backend token",token)
         if(!token){
             return res.status(401).json({
                 success:false,
                 message:"Token is Missing"
             })
         }
-
         try {
-            const decode=await jwt.verify(token,process.env.JWT_SECRET);
+            // console.log("hiii")
+            const decode=jwt.verify(token,process.env.JWT_SECRET);
             console.log(decode);
             req.user=decode;
         } catch (error) {

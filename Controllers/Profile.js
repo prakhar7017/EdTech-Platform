@@ -1,7 +1,7 @@
 const Profile=require("../Models/Profile")
 const User=require("../Models/Users");
 const Course=require("../Models/Course");
-const uplaodToCloudinary=require("../util/imageUploder");
+const {uploadImageToCloud}=require("../util/imageUploder");
 
 exports.updateProfile=async (req,res)=>{
      try {
@@ -34,10 +34,12 @@ exports.updateProfile=async (req,res)=>{
         
         await profileDetails.save();
 
+        const updatedProfile=await User.findById({_id:userId}).populate("additionalDetails").exec();
+
         return res.status(200).json({
             success:true,
             message:"Profile Updated SuccessFully",
-            profileDetails
+            updatedProfile
         })
      } catch (error) {
         return res.status(500).json({
@@ -70,13 +72,12 @@ exports.deleteAccount=async(req,res)=>{
         // await Course.findByIdAndDelete({})
         // hw to detele course s
         const allEnrolledCourses=await User.findById({_id:userId}).select("courses");
-        console.log(allEnrolledCourses.courses);
         allEnrolledCourses.courses.forEach(async (element) => {
             await Course.findByIdAndUpdate({_id:element},{$pull:{studentEnrolled:userId}})
         });
         await User.findByIdAndDelete({_id:userId});
         return res.status(200).json({
-            succes:true,
+            success:true,
             message:"account deleted successfully"
         })
 
@@ -116,12 +117,18 @@ exports.getAllUserDetails=async (req,res)=>{
 }
 exports.updateDisplayPicture=async (req,res)=>{
     try {
+        if(!req.files){
+            return res.status(400).json({
+                success:false,
+                message:"no file were uploaded"
+            })
+        }
+        console.log(req.files)
         const displayPicture=req.files.displayPicture;
         const userId=req.user.id;
-        const image=await uplaodToCloudinary.uploadImageToCloud(displayPicture,process.env.FOLDER_NAME,1000,1000)
+        const image=await uploadImageToCloud(displayPicture,process.env.FOLDER_NAME,1000,1000)
 
         const updateProfile=await User.findByIdAndUpdate({_id:userId},{image:image.secure_url},{new:true});
-        console.log(updateProfile)
 
         return res.status(200).json({
             success:true,

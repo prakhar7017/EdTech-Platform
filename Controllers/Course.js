@@ -6,21 +6,24 @@ const uploadImageToCloud=require("../util/imageUploder");
 
 exports.createCourse=async (req,res)=>{
     try {
+        
         let {courseName,courseDescription,whatYouWillLearn,price,tag,category,status,instructions}=req.body;
+        
         const thumbNail=req.files.thumbnailImage;
+        
         if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !thumbNail || !category){
             return res.status(400).json({
                 success:false,
                 message:"all fields are required"
             })
         }
-
+        
         if (!status || status === undefined) {
 			status = "Draft";
 		}
         const userId=req.user.id;
         const instructorDetails=await User.findById({_id:userId},{accountType:"Instructor"});
-
+        
         if(!instructorDetails){
             return res.status(404).json({
                 success:false,
@@ -35,6 +38,7 @@ exports.createCourse=async (req,res)=>{
                 message:"Category Not Found"
             })
         }
+        
         const uploadImage=await uploadImageToCloud.uploadImageToCloud(thumbNail,process.env.FOLDER_NAME);
 
         const newCourse=await Course.create({
@@ -50,19 +54,19 @@ exports.createCourse=async (req,res)=>{
             instructions:instructions
 
         })
-
+        
         //add the course to userSchema
         await User.findByIdAndUpdate({_id:instructorDetails._id},{$push:{courses:newCourse._id}},{new:true});
-
+        
         // add course in Tag schema 
         await Category.findByIdAndUpdate({_id:categoryDetails._id},{$push:{course:newCourse._id}},{new:true});
-
+        
         return res.status(201).json({
             success:true,
             message:"Course created Successfully",
             data:newCourse
         })
-
+        
     } catch (error) {
         console.log(`error in course creation ${error}`)
         return res.status(500).json({

@@ -63,12 +63,10 @@ exports.sendOTP=async(req,res)=>{
 }
 // signup
 exports.postSignup=async (req,res)=>{
+    console.log(req.body);
    try {
      //data fetch
-     const {
-        firstName,lastName,email,password,accountType,confirmPassword,otp
-    }=req.body;
-        console.log(otp);
+     const {firstName,lastName,email,password,accountType,confirmPassword,otp}=req.body;
     // data validate
     if(!firstName || !lastName || !email || !password || !confirmPassword || !otp ||   !accountType){
         return res.status(403).json({
@@ -157,7 +155,7 @@ exports.postLogin=async(req,res)=>{
             })
         }
         // user check exist or not
-        const existUser=await User.findOne({email})
+        const existUser=await User.findOne({email}).populate("additionalDetails").exec();
         if(!existUser){
             return res.status(401).json({
                 success:false,
@@ -178,7 +176,7 @@ exports.postLogin=async(req,res)=>{
             accountType :existUser.accountType
         }
         const token=jwt.sign(payload,process.env.JWT_SECRET,{
-            expiresIn:"2h"
+            expiresIn:"24h"
         })
         existUser.token=token;
         existUser.password=undefined;
@@ -204,21 +202,15 @@ exports.postLogin=async(req,res)=>{
 // changePassword 
 exports.postChangePassword=async(req,res)=>{
     try {
-        const {email,oldPassword,newPassword,confirmPassword}=req.body;
+        const {oldPassword,newPassword}=req.body;
 
-        if(!email || !oldPassword || !newPassword || !confirmPassword){
+        if(!oldPassword || !newPassword){
             return res.status(403).json({
                 success:false,
                 message:"All fields are required"
             })
         }
-        if(newPassword!==confirmPassword){
-            return res.status(400).json({
-                success:false,
-                message:"Password and ConfirmPassword  Does Not Match"
-            })
-        }
-        const prevUser=User.findOne({email});
+        const prevUser=await User.findById(req.user.id);
         const prevPassword=prevUser.password;
 
         if(!bcrypt.compare(oldPassword,prevPassword)){
@@ -228,10 +220,16 @@ exports.postChangePassword=async(req,res)=>{
             })
         }
 
-        const newHashPassword=bcrypt.hash(10,newPassword);
-        const updatedUser=await User.findOneAndUpdate({email},{$set:{password:newHashPassword}},{new:true});
+        const newHashPassword=await bcrypt.hash(newPassword,10);
+        const updatedUser=await User.findByIdAndUpdate(req.user.id,{$set:{password:newHashPassword}},{new:true});
 
-        await mailSender(email,"Password Changed Successfully","Successful")
+        const emailResponse=await mailSender(prevUser.email,"Password Changed Successfully","Successful")
+        if(!emailResponse){
+            return res.status(400).json({
+                success:false,
+                message:"mail not sent"
+            })
+        }
 
         res.status(200).json({
             success:true,
