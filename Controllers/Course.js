@@ -1,17 +1,24 @@
 const Course=require("../Models/Course");
 const Category=require("../Models/Category");
 const User=require("../Models/Users");
+const Section=require("../Models/Section");
+const SUBSection=require("../Models/SubSections");
 const uploadImageToCloud=require("../util/imageUploder");
 
 
 exports.createCourse=async (req,res)=>{
     try {
         
-        let {courseName,courseDescription,whatYouWillLearn,price,tag,category,status,instructions}=req.body;
+        let {courseName,courseDescription,whatYouWillLearn,price,tag:_tag,category,status,instructions:_instructions}=req.body;
+    
         
         const thumbNail=req.files.thumbnailImage;
         
-        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag || !thumbNail || !category){
+        const tag=JSON.parse(_tag);
+        const instructions=JSON.parse(_instructions);
+
+
+        if(!courseName || !courseDescription || !whatYouWillLearn || !price || !tag.length || !thumbNail || !category || !instructions.length){
             return res.status(400).json({
                 success:false,
                 message:"all fields are required"
@@ -78,7 +85,7 @@ exports.createCourse=async (req,res)=>{
 
 exports.getAllCourse=async(req,res)=>{
     try {
-        const allCourse=await Course.find({},{   courseName:true,
+        const allCourse=await Course.find({},{courseName:true,
             instructor:true,
             price:true,
             thumbnail:true,
@@ -142,6 +149,115 @@ exports.getCourseDetails=async (req,res)=>{
             error:error.message
         })
     }
+}
 
+exports.deleteCourse=async(req,res)=>{
+    try {
+        const {courseId}=req.body;
+        const userId=req.user.id
 
+        if(!courseId){
+            return res.status(400).json({
+                success:false,
+                message:"Course Id not found"
+            })
+        }
+
+        
+        const course=await Course.findById(courseId).populate("courseContent").exec();
+        console.log(course);
+        const AllCourse=course.CourseContent;
+
+        const delete_Section_subsection=AllCourse.map(async (sectionid)=>{
+            const section=Section.findById(sectionid).populate("subSection").exec;
+
+            const subsection=section.SubSection;
+
+            subsection.map(async (element)=>{
+                await SUBSection.findByIdAndDelete(element);
+            })
+
+            await Section.findByIdAndDelete(sectionid);
+        })
+
+        const deletedCourses= await User.findByIdAndUpdate(userId,{$pull:{courses:courseId}},{new:true});
+
+        if(!deletedCourses){
+            return res.status(400).json({
+                success:false,
+                message:"Unable to delete the Course"
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"Course Deleted Successfully",
+            deletedCourses
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:`Internal Server Error->${error}`
+        })
+    }
+}
+
+exports.updateCourse=async (req,res)=>{
+    try {
+        const {courseId}=req.body;
+
+        const updates=req.body;
+    
+        const course=await Course.findById(courseId);
+    
+        if(!course){
+            return res.status(404).json({
+                success:false,
+                message:"Course does not exist"
+            })
+        }
+    
+        if(req.files && req.files.thumbnailImage){
+            const thumbnail=req.files.thumbnailImage;
+            const thumbnailImage=await uploadImageToCloud.uploadImageToCloud(thumbnail,process.env.FOLDER_NAME);
+            
+            course.thumbnail=thumbnailImage.secure_url;
+        }
+    
+        for(let field in updates){
+            if(updates.hasOwnProperty(key)){
+                if(key==="tag" || key==="instructions"){
+                    course[key]=JSON.parse(updates[key])
+                }
+            }else{
+                course[key]=updates[key]
+            }
+        }
+    
+        await course.save();
+    
+        const updatedCourse=await Course.findById(courseId).populate({
+            path:"instructor",
+            populate:{
+                path:"additionalDetails",
+            }
+        }).populate({
+            path:"courseContent",
+            populate:{
+                path:"subSection"
+            }
+        }).populate("category")
+        .populate("ratingAndReviews").exec();
+    
+        return res.status(200).json({
+            success:true,
+            message:"Course Updated Successfully",
+            data:updatedCourse
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"Unable to Update Course"
+        })
+    }
 }

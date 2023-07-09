@@ -15,6 +15,10 @@ const auth_middleware=require("../Middlewares/Auth");
 
 router.post("/createCourse",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.createCourse);
 
+router.post("/editCourse",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.updateCourse);
+
+router.delete("/deleteCourse",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.deleteCourse);
+
 router.post("/addSection",auth_middleware.isAuthenticated,auth_middleware.isInstructor,section_controller.createSection)
 
 router.post("/updateSection",auth_middleware.isAuthenticated,auth_middleware.isInstructor,section_controller.updateSection);
