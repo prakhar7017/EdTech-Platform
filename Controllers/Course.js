@@ -2,7 +2,9 @@ const Course=require("../Models/Course");
 const Category=require("../Models/Category");
 const User=require("../Models/Users");
 const Section=require("../Models/Section");
-const SUBSection=require("../Models/SubSections");
+// const SUBSection=require("../Models/SubSections");
+const SubSection=require("../Models/SubSections");
+const CourseProgress=require("../Models/CourseProgress");
 const uploadImageToCloud=require("../util/imageUploder");
 
 
@@ -205,11 +207,15 @@ exports.deleteCourse=async(req,res)=>{
 exports.updateCourse=async (req,res)=>{
     try {
         const {courseId}=req.body;
-
         const updates=req.body;
-    
         const course=await Course.findById(courseId);
-    
+
+        // if(!updates){
+        //     return res.status(404).json({
+        //         success:false,
+        //         message:"No Changed Made Yet..."
+        //     })
+        // }
         if(!course){
             return res.status(404).json({
                 success:false,
@@ -225,12 +231,12 @@ exports.updateCourse=async (req,res)=>{
         }
     
         for(let field in updates){
-            if(updates.hasOwnProperty(key)){
-                if(key==="tag" || key==="instructions"){
-                    course[key]=JSON.parse(updates[key])
+            if(updates.hasOwnProperty(field)){
+                if(field==="tag" || field==="instructions"){
+                    course[field]=JSON.parse(updates[field])
                 }
             }else{
-                course[key]=updates[key]
+                course[field]=updates[field]
             }
         }
     
@@ -259,5 +265,57 @@ exports.updateCourse=async (req,res)=>{
             success:false,
             message:"Unable to Update Course"
         })
+    }
+}
+
+exports.getFullCourseDetails=async (req,res)=>{
+    try {
+        const {courseId}=req.body;
+        const userId=req.user.id;
+    
+        const courseDetails=await Course.findById(courseId).populate({
+            path:"instructor",
+            populate:{
+                path:"additionalDetails"
+            }
+        }).populate({
+            path:"courseContent",
+            populate:{
+                path:"subSection"
+            }
+        }).populate("category").populate("ratingAndReviews").exec();
+    
+        const courseProgressCount=await CourseProgress.findOne({courseId:courseId});
+    
+        if(!courseDetails){
+            return res.status(400).json({
+                success:false,
+                message:"Cound not find the course"
+            })
+        }
+    
+        let totalDurationInSeconds=0;
+        courseDetails?.courseContent?.forEach((content)=>{
+            content?.subsection?.forEach((subSection)=>{
+                const timeDurationInSeconds=parseInt(subSection?.timeDuration);
+                totalDurationInSeconds+=timeDurationInSeconds;
+            })
+        })
+    
+        const totalDuration=convertSecondsToDuration(totalDurationInSeconds);
+    
+        return res.status(200).json({
+            success:true,
+            data:{
+                courseDetails,
+                totalDuration,
+                completedVideos:courseProgressCount?.completedVideos ? courseProgressCount?.completedVideos :[],
+            },
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+          })
     }
 }
