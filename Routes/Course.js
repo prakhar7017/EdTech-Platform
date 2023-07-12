@@ -19,6 +19,7 @@ router.post("/editCourse",auth_middleware.isAuthenticated,auth_middleware.isInst
 
 router.delete("/deleteCourse",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.deleteCourse);
 
+
 router.post("/addSection",auth_middleware.isAuthenticated,auth_middleware.isInstructor,section_controller.createSection)
 
 router.post("/updateSection",auth_middleware.isAuthenticated,auth_middleware.isInstructor,section_controller.updateSection);
@@ -35,6 +36,9 @@ router.get("/getAllCourses",auth_middleware.isAuthenticated,auth_middleware.isIn
 
 router.get("/getFullCourseDetails",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getCourseDetails);
 
+router.get("/getInstructorCourses",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getInstructorCourse);
+
+router.get("/getFullCourseDetails",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getFullCourseDetails);
 
 router.post("/createCategory",auth_middleware.isAuthenticated,auth_middleware.isAdmin,category_controller.createCategory);
 
