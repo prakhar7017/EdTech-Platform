@@ -154,54 +154,46 @@ exports.getCourseDetails=async (req,res)=>{
 }
 
 exports.deleteCourse=async(req,res)=>{
-    try {
-        const {courseId}=req.body;
-        const userId=req.user.id
+   try {
+    const courseId=req.body;
+    const course=await Course.findById(courseId);
 
-        if(!courseId){
-            return res.status(400).json({
-                success:false,
-                message:"Course Id not found"
-            })
-        }
-
-        
-        const course=await Course.findById(courseId).populate("courseContent").exec();
-        console.log(course);
-        const AllCourse=course.CourseContent;
-
-        const delete_Section_subsection=AllCourse.map(async (sectionid)=>{
-            const section=Section.findById(sectionid).populate("subSection").exec;
-
-            const subsection=section.SubSection;
-
-            subsection.map(async (element)=>{
-                await SUBSection.findByIdAndDelete(element);
-            })
-
-            await Section.findByIdAndDelete(sectionid);
-        })
-
-        const deletedCourses= await User.findByIdAndUpdate(userId,{$pull:{courses:courseId}},{new:true});
-
-        if(!deletedCourses){
-            return res.status(400).json({
-                success:false,
-                message:"Unable to delete the Course"
-            })
-        }
-
-        return res.status(200).json({
-            success:true,
-            message:"Course Deleted Successfully",
-            deletedCourses
-        })
-    } catch (error) {
-        return res.status(500).json({
+    if(!course){
+        return res.status(400).json({
             success:false,
-            message:`Internal Server Error->${error}`
+            message:"Course Not Found"
         })
     }
+
+    const studentEnrolled=course.studentEnrolled;
+    for(const userId of studentEnrolled){
+        await User.findByIdAndUpdate(userId,{$pull:{courses:courseId}},{new:true})
+    }
+
+    const courseSection=course.courseContent;
+    for(const sectionId of courseSection){
+        const section=await Section.findById(sectionId);
+        if(section){
+            const subSection=section?.subSection;
+            for(const subSectionId of subSection){
+                await SubSection.findByIdAndDelete(subSectionId);
+            }
+        }
+        await Section.findByIdAndDelete(sectionId);
+    }
+
+    await Course.findByIdAndDelete(courseId);
+
+    return res.status(200).json({
+        success:true,
+        message:"Course Deleted Successfully",
+    })
+   } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        })
+   }
 }
 
 exports.updateCourse=async (req,res)=>{
