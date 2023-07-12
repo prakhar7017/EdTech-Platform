@@ -319,3 +319,29 @@ exports.getFullCourseDetails=async (req,res)=>{
           })
     }
 }
+
+exports.getInstructorCourse=async (req,res)=>{
+    try {
+        const instructorId=req.user.id;
+        const instructorCourses=await Course.find({instructor:instructorId}).sort({createdAt:-1});
+
+        if(!instructorCourses){
+            return res.status(400).json({
+                success:false,
+                message:"Instructor Courses not found"
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"Instructor Courses found",
+            data:instructorCourses
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        })
+    }
+}
