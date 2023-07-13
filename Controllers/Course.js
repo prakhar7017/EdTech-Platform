@@ -2,7 +2,7 @@ const Course=require("../Models/Course");
 const Category=require("../Models/Category");
 const User=require("../Models/Users");
 const Section=require("../Models/Section");
-// const SUBSection=require("../Models/SubSections");
+const {convertSecondsToDuration}=require("../util/SecondsToDurationConverter")
 const SubSection=require("../Models/SubSections");
 const CourseProgress=require("../Models/CourseProgress");
 const uploadImageToCloud=require("../util/imageUploder");
@@ -156,8 +156,10 @@ exports.getCourseDetails=async (req,res)=>{
 exports.deleteCourse=async(req,res)=>{
    try {
     const courseId=req.body;
+    console.log("hello1")
     const course=await Course.findById(courseId);
-
+    console.log("hello2")
+    
     if(!course){
         return res.status(400).json({
             success:false,
@@ -169,6 +171,7 @@ exports.deleteCourse=async(req,res)=>{
     for(const userId of studentEnrolled){
         await User.findByIdAndUpdate(userId,{$pull:{courses:courseId}},{new:true})
     }
+    console.log("hello3")
 
     const courseSection=course.courseContent;
     for(const sectionId of courseSection){
@@ -181,7 +184,7 @@ exports.deleteCourse=async(req,res)=>{
         }
         await Section.findByIdAndDelete(sectionId);
     }
-
+    console.log("hello4")
     await Course.findByIdAndDelete(courseId);
 
     return res.status(200).json({
@@ -222,16 +225,15 @@ exports.updateCourse=async (req,res)=>{
             course.thumbnail=thumbnailImage.secure_url;
         }
     
-        for(let field in updates){
+        for(const field in updates){
             if(updates.hasOwnProperty(field)){
                 if(field==="tag" || field==="instructions"){
                     course[field]=JSON.parse(updates[field])
+                }else{
+                    course[field]=updates[field]
                 }
-            }else{
-                course[field]=updates[field]
             }
         }
-    
         await course.save();
     
         const updatedCourse=await Course.findById(courseId).populate({
