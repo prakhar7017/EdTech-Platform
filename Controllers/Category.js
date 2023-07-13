@@ -1,4 +1,8 @@
 const Category=require("../Models/Category");
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max)
+}
+
 
 
 exports.createCategory=async (req,res)=>{
@@ -54,35 +58,73 @@ exports.categoryPagedetails=async (req,res)=>{
     try {
         const {categoryId}=req.body;
 
-        const selectedCategory=await Category.findById({_id:categoryId}).populate("course").exec();
+        const selectedCategoryCourse=await Category.findById(categoryId).populate({
+            path:"course",
+            match:{status:"Published"},
+            populate:{
+                path:"ratingAndReviews"
+            }
 
-        if(!selectedCategory){
+        }).exec();
+        // console.log(selectedCategoryCourse);
+
+
+        if(!selectedCategoryCourse){
             return res.status(404).json({
                 success:false,
-                message:"data not found"
+                message:"Category Not Found"
             })
         }
 
-        const differentCategory=await Category.find({_id:{$ne:categoryId}}).populate("course").exec();
+        if(selectedCategoryCourse?.course?.length===0){
+            return res.status(404).json({
+                success:false,
+                message:"No Courses Found For Selected Category "
+            })
+        }
 
-        // const topSelling 
-        
+    
+        const categoriesExcludedSelected=await Category.find({_id:{$ne:categoryId}});
 
-        return res.status(200).json({
-            success:true,
-            message:"all data fetched successfully",
-            data:{
-                selectedCategory,
-                differentCategory
+        const differentCategory=await Category.findOne(
+            categoriesExcludedSelected[getRandomInt(categoriesExcludedSelected.length)]
+              ._id
+          )
+            .populate({
+              path: "course",
+              match: { status: "Published" },
+            })
+            .exec()
+
+
+        const allCategories=await Category.find().populate({
+            path:"course",
+            match:{status:"Published"},
+            populate:{
+                path:"instructor"
             }
+        }).exec();
 
-        })
+        // console.log(allCategories);
         
-    } catch (error) {
-        res.status(500).json({
+        const allCourse=allCategories.flatMap((category)=>category?.course);
+        // console.log(allCourse);
+        const mostSellingCourse=allCourse.sort((a,b)=>b.sold-a.sold).slice(0,10);
+        // console.log(mostSellingCourse);
+        return res.status(200).json({
             success:false,
-            message:"failed to fetch category page datails",
-            error:error.message
+            message:"CategoriesDetails Founded Successfully",
+            data:{
+                selectedCategoryCourse,
+                differentCategory,
+                mostSellingCourse
+            }
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:error.message
         })
     }
 } 
