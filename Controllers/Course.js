@@ -155,10 +155,9 @@ exports.getCourseDetails=async (req,res)=>{
 
 exports.deleteCourse=async(req,res)=>{
    try {
-    const courseId=req.body;
-    console.log("hello1")
+    const {courseId}=req.body;
+
     const course=await Course.findById(courseId);
-    console.log("hello2")
     
     if(!course){
         return res.status(400).json({
