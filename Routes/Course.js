@@ -44,7 +44,7 @@ router.post("/createCategory",auth_middleware.isAuthenticated,auth_middleware.is
 
 router.get("/showAllCategories",category_controller.getAllCategory);
 
-router.get("/categoryPageDetails",auth_middleware.isAuthenticated,auth_middleware.isAdmin,category_controller.categoryPagedetails);
+router.post("/getCategoryPageDetails",category_controller.categoryPagedetails);
 
 
 router.post("/createRating",auth_middleware.isAuthenticated,auth_middleware.isStudent,ratingandreview_controller.createRatingandReview)

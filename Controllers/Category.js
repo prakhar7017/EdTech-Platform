@@ -112,7 +112,7 @@ exports.categoryPagedetails=async (req,res)=>{
         const mostSellingCourse=allCourse.sort((a,b)=>b.sold-a.sold).slice(0,10);
         // console.log(mostSellingCourse);
         return res.status(200).json({
-            success:false,
+            success:true,
             message:"CategoriesDetails Founded Successfully",
             data:{
                 selectedCategoryCourse,

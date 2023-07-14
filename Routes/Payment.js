@@ -5,6 +5,6 @@ const auth_middleware=require("../Middlewares/Auth");
 
 router.post("/capturePayment",auth_middleware.isAuthenticated,auth_middleware.isStudent,payment_controller.capturePayment)
 
-router.post("/verifySignature",payment_controller.verifySignature)
+router.post("/verifySignature",payment_controller.verifyPayment)
 
 module.exports=router;
