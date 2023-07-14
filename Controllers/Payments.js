@@ -6,6 +6,7 @@ const User=require("../Models/Users");
 const mailSender=require("../util/mailSender");
 const Razorpay=require("razorpay");
 const { courseEnrollmentEmail } = require("../mail/templates/courseEnrollmentEmail");
+const {paymentSuccessEmail} =require("../mail/templates/paymentSuccessEmail")
 
 exports.capturePayment=async (req,res)=>{
     const {courses}=req.body;
@@ -137,9 +138,36 @@ const enrollStudent=async (courses,userId,res)=>{
         })
         
     }
+}
 
+exports.sendPaymentSuccessEmail=async(req,res)=>{
+    const {orderId,paymentId,amount}=req.body;
 
+    const userId=req.user.id;
 
+    if(!orderId || !paymentId ||amount){
+        return res.status(400).json({
+            success:false,
+            message:"All Fields Are Required"
+        })
+    }
+
+    try {
+        const enrolledStudent=await User.findById(userId)
+
+        await mailSender(enrolledStudent.email,paymentSuccessEmail(`${enrolledStudent.firstName}`,amount/100,orderId,paymentId));
+
+        return res.status(200).json({
+            success:true,
+            message:"Payment Email Sent SuccessFully"
+        })
+ 
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        })
+    }
 
 }
 // exports.capturePayment=async(req,res)=>{
