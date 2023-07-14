@@ -7,4 +7,6 @@ router.post("/capturePayment",auth_middleware.isAuthenticated,auth_middleware.is
 
 router.post("/verifySignature",payment_controller.verifyPayment)
 
+router.post("/payment/sendPaymentSuccessEmail",auth_middleware.isAuthenticated,auth_middleware.isInstructor,payment_controller.sendPaymentSuccessEmail)
+
 module.exports=router;
