@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
-const instance=require("../Configs/Razorpay");
+const crypto=require("crypto");
+const {instance}=require("../Configs/Razorpay");
 const Course=require("../Models/Course");
 const CreateOrder=require("../util/CreateOrder");
 const User=require("../Models/Users");
@@ -9,7 +10,9 @@ const { courseEnrollmentEmail } = require("../mail/templates/courseEnrollmentEma
 const {paymentSuccessEmail} =require("../mail/templates/paymentSuccessEmail")
 
 exports.capturePayment=async (req,res)=>{
+
     const {courses}=req.body;
+
     const userId=req.user.id;
 
     if(courses.length===0){
@@ -21,6 +24,7 @@ exports.capturePayment=async (req,res)=>{
 
     let totalAmount=0;
      for(const course_id of courses){
+
         let course;
         try {
             course=await Course.findById(course_id);
@@ -30,6 +34,7 @@ exports.capturePayment=async (req,res)=>{
                     message:"Could not find the course"
                 })
             }
+
             const uid=new mongoose.Types.ObjectId(userId);
             if(course?.studentEnrolled?.includes(uid)){
                 return res.status(200).json({
@@ -37,6 +42,7 @@ exports.capturePayment=async (req,res)=>{
                     message:"Student is already Inrolled"
                 })
             }
+
             totalAmount+=course?.price
         } catch (error) {
             return res.status(500).json({
@@ -46,9 +52,11 @@ exports.capturePayment=async (req,res)=>{
         }
     }
 
+    const amount=totalAmount*100
+    const currency="INR"
     const option={
-        amount:totalAmount*100,
-        currency:"INR",
+        amount,
+        currency,
         receipt:Math.random(Date.now()).toString(),
     }
 
@@ -60,6 +68,7 @@ exports.capturePayment=async (req,res)=>{
             data:paymentResponse
         })
     } catch (error) {
+        console.log(error); 
         return res.status(500).json({
             success:false,
             message:"Could not Initiate Order"
@@ -69,6 +78,7 @@ exports.capturePayment=async (req,res)=>{
 }
 
 exports.verifyPayment=async (req,res)=>{
+    console.log(req.body);
     const razorpay_order_id=req.body?.razorpay_order_id;
     const razorpay_payment_id=req.body?.razorpay_payment_id;
     const razorpay_signature=req.body?.razorpay_signature;
@@ -141,11 +151,12 @@ const enrollStudent=async (courses,userId,res)=>{
 }
 
 exports.sendPaymentSuccessEmail=async(req,res)=>{
+    console.log(req.body);
     const {orderId,paymentId,amount}=req.body;
 
     const userId=req.user.id;
 
-    if(!orderId || !paymentId ||amount){
+    if(!orderId || !paymentId ||!amount){
         return res.status(400).json({
             success:false,
             message:"All Fields Are Required"

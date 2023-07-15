@@ -147,7 +147,7 @@ exports.updateDisplayPicture=async (req,res)=>{
 exports.getEnrolledCourses=async (req,res)=>{
     try {
         const userId=req.user.id;
-        const allCourses=await User.findOne({_id:userId}).populate("course").select("course").exec();
+        const allCourses=await User.findOne({_id:userId}).populate("courses").select("courses").exec();
 
         if(!allCourses){
             return res.status(400).json({
@@ -157,9 +157,9 @@ exports.getEnrolledCourses=async (req,res)=>{
         }
 
         return res.status(200).json({
-            success:false,
+            success:true,
             message:"enrolled courses fetched successfully",
-            allCourses
+            data:allCourses
         })
     } catch (error) {
         return res.status(500).json({
