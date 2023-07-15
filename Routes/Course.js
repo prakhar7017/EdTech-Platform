@@ -32,9 +32,9 @@ router.post("/updateSubSection",auth_middleware.isAuthenticated,auth_middleware.
 
 router.post("/deleteSubSection",auth_middleware.isAuthenticated,auth_middleware.isInstructor,subsection_controller.deleteSubSection);
 
-router.get("/getAllCourses",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getAllCourse);
+router.get("/getAllCourses",course_controller.getAllCourse);
 
-router.get("/getFullCourseDetails",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getCourseDetails);
+router.post("/getCourseDetails",course_controller.getCourseDetails);
 
 router.get("/getInstructorCourses",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getInstructorCourse);
 

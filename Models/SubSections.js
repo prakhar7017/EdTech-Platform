@@ -21,6 +21,6 @@ const subSection=new mongoose.Schema({
         trim:true,
         required:true,
     },
-})
+},{timestamps:true})
 
 module.exports=mongoose.model("SubSection",subSection);

@@ -78,7 +78,6 @@ exports.capturePayment=async (req,res)=>{
 }
 
 exports.verifyPayment=async (req,res)=>{
-    console.log(req.body);
     const razorpay_order_id=req.body?.razorpay_order_id;
     const razorpay_payment_id=req.body?.razorpay_payment_id;
     const razorpay_signature=req.body?.razorpay_signature;
@@ -97,6 +96,7 @@ exports.verifyPayment=async (req,res)=>{
     const expectedSignature=crypto.createHmac("sha256",process.env.KEY_SECRET).update(body.toString()).digest("hex");
 
     if(expectedSignature===razorpay_signature){
+        await enrollStudent(courses,userId,res);
         return res.status(200).json({
             success:true,
             message:"Payment Verified"
@@ -126,21 +126,10 @@ const enrollStudent=async (courses,userId,res)=>{
                 })
             }
     
-            const enrolledStudent=await User.findByIdAndUpdate({_id:userId},{$push:{course:courseId}},{new:true});
+            const enrolledStudent=await User.findByIdAndUpdate({_id:userId},{$push:{courses:courseId}},{new:true});
     
             const emailResponse=await mailSender(enrolledStudent.email,`SuccessFully Enrolled into ${enrolledCourse.courseName}`,courseEnrollmentEmail(enrolledCourse.courseName,enrolledStudent.firstName+" "+enrolledStudent.lastName));
-    
-            if(!emailResponse){
-                return res.status(400).json({
-                    success:false,
-                    message:"Could not send email"
-                })
-            }
         }
-        return res.status(200).json({
-            success:true,
-            message:"Enrolled Successfullly"
-        })
     } catch (error) {
         return res.status(500).json({
             success:false,

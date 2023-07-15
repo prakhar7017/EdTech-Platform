@@ -113,13 +113,14 @@ exports.getAllCourse=async(req,res)=>{
 exports.getCourseDetails=async (req,res)=>{
     try {
         const {courseId}=req.body;
+
         if(!courseId){
             return res.status(400).json({
                 success:false,
                 message:"Course Id not found"
             })
         }
-        const courseDetails=await Course.find({_id:courseId}).populate({
+        const courseDetails=await Course.findById({_id:courseId}).populate({
             path:"instructor",
             populate:{
                 path:"additionalDetails"
@@ -138,10 +139,24 @@ exports.getCourseDetails=async (req,res)=>{
             })
         }
 
+        let totalDurationInSeconds = 0
+        courseDetails.courseContent.forEach((content) => {
+          content.subSection.forEach((subSection) => {
+            const timeDurationInSeconds = parseInt(subSection.timeDuration)
+            totalDurationInSeconds += timeDurationInSeconds
+          })
+        })
+    
+        const totalDuration = convertSecondsToDuration(totalDurationInSeconds)
+
         return res.status(200).json({
             success:true,
             message:"Course founded Successfully",
-            courseDetails
+            data:{
+                courseDetails,
+                totalDuration
+            }
+
         })
 
     } catch (error) {
