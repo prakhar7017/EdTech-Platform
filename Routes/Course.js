@@ -38,7 +38,7 @@ router.post("/getCourseDetails",course_controller.getCourseDetails);
 
 router.get("/getInstructorCourses",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getInstructorCourse);
 
-router.post("/getFullCourseDetails",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.getFullCourseDetails);
+router.post("/getFullCourseDetails",auth_middleware.isAuthenticated,course_controller.getFullCourseDetails);
 
 router.post("/createCategory",auth_middleware.isAuthenticated,auth_middleware.isAdmin,category_controller.createCategory);
 
