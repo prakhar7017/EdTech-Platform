@@ -168,3 +168,45 @@ exports.getEnrolledCourses=async (req,res)=>{
           })
     }
 }
+
+exports.instructorDashboard=async(req,res)=>{
+    try {
+        const userId=req.user.id;
+
+        const courseDetails=await Course.find({instructor:userId});
+
+        if(!courseDetails){
+            return res.status(404).json({
+                success:false,
+                message:"No Course Found"
+            })
+        }
+
+        const statisticData=courseDetails?.map((course)=>{
+            const totalStudent=course?.studentEnrolled?.length;
+            const totalAmount=totalStudent*course.price;
+
+            const data={
+                _id:course._id,
+                courseDescription:course?.courseDescription,
+                courseName:course?.courseName,
+                totalStudent,
+                totalAmount
+            }
+            return data;
+        })
+
+        return res.status(200).json({
+            success:true,
+            message:"instructor Dashboard details fetched Successfully",
+            data:statisticData
+        })
+
+    } catch (error) {
+        return req.status(500).json({
+            success:false,
+            message:error.message
+        })
+    }
+
+}

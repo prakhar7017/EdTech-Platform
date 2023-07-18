@@ -15,4 +15,6 @@ router.put("/updateDisplayPicture",auth_middleware.isAuthenticated,profile_contr
 
 router.get("/getEnrolledCourses",auth_middleware.isAuthenticated,profile_controller.getEnrolledCourses)
 
+router.get("/instructorDashboard",auth_middleware.isAuthenticated,auth_middleware.isInstructor,profile_controller.instructorDashboard)
+
 module.exports=router;
