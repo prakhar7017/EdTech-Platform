@@ -88,7 +88,7 @@ exports.getAllRandR=async(req,res)=>{
     try {
         const allRatingAndReview=await RandR.find({}).sort({rating:-1}).populate({
             path:"user",
-            select:"firstName,lastName,email,image"}
+            select:"firstName lastName email image"}
         ).populate({
             path:"course",
             select:"courseName",

@@ -13,6 +13,8 @@ const ratingandreview_controller=require("../Controllers/RatingandReview");
 
 const auth_middleware=require("../Middlewares/Auth");
 
+const courseProgress_controller=require("../Controllers/courseProgress");
+
 router.post("/createCourse",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.createCourse);
 
 router.post("/editCourse",auth_middleware.isAuthenticated,auth_middleware.isInstructor,course_controller.updateCourse);
@@ -52,5 +54,7 @@ router.post("/createRating",auth_middleware.isAuthenticated,auth_middleware.isSt
 router.get("/getAverageRating",ratingandreview_controller.getAverageRating);
 
 router.get("/getReviews",ratingandreview_controller.getAllRandR)
+
+router.post("/updateCourseProgress",auth_middleware.isAuthenticated,auth_middleware.isStudent,courseProgress_controller.updateCourseProgress)
 
 module.exports=router;

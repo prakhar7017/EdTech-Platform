@@ -7,7 +7,8 @@ const User=require("../Models/Users");
 const mailSender=require("../util/mailSender");
 const Razorpay=require("razorpay");
 const { courseEnrollmentEmail } = require("../mail/templates/courseEnrollmentEmail");
-const {paymentSuccessEmail} =require("../mail/templates/paymentSuccessEmail")
+const {paymentSuccessEmail} =require("../mail/templates/paymentSuccessEmail");
+const CourseProgress = require("../Models/CourseProgress");
 
 exports.capturePayment=async (req,res)=>{
 
@@ -125,8 +126,21 @@ const enrollStudent=async (courses,userId,res)=>{
                     message:"course not found"
                 })
             }
-    
-            const enrolledStudent=await User.findByIdAndUpdate({_id:userId},{$push:{courses:courseId}},{new:true});
+
+            const courseProgress=await CourseProgress.create({
+                courseId:courseId,
+                userId:userId,
+                completedVideos:[]
+            })
+
+
+            const enrolledStudent=await User.findByIdAndUpdate({_id:userId},{
+                $push:{
+                courses:courseId,
+                courseProgress:courseProgress._id
+                }},{new:true});
+
+            
     
             const emailResponse=await mailSender(enrolledStudent.email,`SuccessFully Enrolled into ${enrolledCourse.courseName}`,courseEnrollmentEmail(enrolledCourse.courseName,enrolledStudent.firstName+" "+enrolledStudent.lastName));
         }
