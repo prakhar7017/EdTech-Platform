@@ -16,6 +16,7 @@ exports.createCourse=async (req,res)=>{
         
         const thumbNail=req.files.thumbnailImage;
         
+        // Convert the tag and instructions from stringified Array to Array
         const tag=JSON.parse(_tag);
         const instructions=JSON.parse(_instructions);
 
@@ -95,6 +96,13 @@ exports.getAllCourse=async(req,res)=>{
             ratingAndReviews:true,
             studentEnrolled:true,
         }).populate("instructor").exec();
+
+        if(!allCourse){
+            return res.status(400).json({
+                success:false,
+                message:"Unable to fetch all courses"
+            })
+        }
 
         return res.status(200).json({
             success:false,
@@ -185,7 +193,6 @@ exports.deleteCourse=async(req,res)=>{
     for(const userId of studentEnrolled){
         await User.findByIdAndUpdate(userId,{$pull:{courses:courseId}},{new:true})
     }
-    console.log("hello3")
 
     const courseSection=course.courseContent;
     for(const sectionId of courseSection){
@@ -198,7 +205,12 @@ exports.deleteCourse=async(req,res)=>{
         }
         await Section.findByIdAndDelete(sectionId);
     }
-    console.log("hello4")
+
+    const categoryArray=course?.category;
+    for(const category_id of categoryArray){
+        await Category.findByIdAndUpdate(category_id,{$pull:{course:course._id}})
+    }
+
     await Course.findByIdAndDelete(courseId);
 
     return res.status(200).json({
