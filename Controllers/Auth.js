@@ -5,6 +5,7 @@ const otpGenerator = require('otp-generator');
 const bcrypt=require("bcrypt"); 
 const jwt=require("jsonwebtoken");
 const Profile = require("../Models/Profile");
+const upadatePassword=require("../mail/templates/passwordUpdate");
 
 // sendOTP
 exports.sendOTP=async(req,res)=>{
@@ -63,7 +64,6 @@ exports.sendOTP=async(req,res)=>{
 }
 // signup
 exports.postSignup=async (req,res)=>{
-    console.log(req.body);
    try {
      //data fetch
      const {firstName,lastName,email,password,accountType,confirmPassword,otp}=req.body;
@@ -223,7 +223,8 @@ exports.postChangePassword=async(req,res)=>{
         const newHashPassword=await bcrypt.hash(newPassword,10);
         const updatedUser=await User.findByIdAndUpdate(req.user.id,{$set:{password:newHashPassword}},{new:true});
 
-        const emailResponse=await mailSender(prevUser.email,"Password Changed Successfully","Successful")
+        const emailResponse=await mailSender(prevUser.email,"Password Changed Successfully",upadatePassword(updatedUser.email,`Password updated for ${updatedUser.firstName} ${updatedUser.lastName}`))
+        
         if(!emailResponse){
             return res.status(400).json({
                 success:false,
