@@ -154,7 +154,6 @@ const enrollStudent=async (courses,userId,res)=>{
 }
 
 exports.sendPaymentSuccessEmail=async(req,res)=>{
-    console.log(req.body);
     const {orderId,paymentId,amount}=req.body;
 
     const userId=req.user.id;

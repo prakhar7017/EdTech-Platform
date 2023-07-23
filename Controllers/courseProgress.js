@@ -40,7 +40,7 @@ exports.updateCourseProgress=async(req,res)=>{
 
         return res.status(200).json({
             success:true,
-            message:"Course Prgress Updated Successfully"
+            message:"Course Progress Updated Successfully"
         })
     } catch (error) {
         return res.status(500).json({

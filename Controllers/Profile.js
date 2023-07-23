@@ -2,10 +2,12 @@ const Profile=require("../Models/Profile")
 const User=require("../Models/Users");
 const Course=require("../Models/Course");
 const {uploadImageToCloud}=require("../util/imageUploder");
+const {convertSecondsToDuration} =require("../util/SecondsToDurationConverter");
+const CourseProgress = require("../Models/CourseProgress");
 
 exports.updateProfile=async (req,res)=>{
      try {
-        const {gender="",dateOfBirth="",about="",contactNumber="",profession=""}=req.body;
+        const {gender="",dateOfBirth="",about="",contactNumber="",profession="",firstName="",lastName=""}=req.body;
 
         const userId=req.user.id;
 
@@ -25,6 +27,8 @@ exports.updateProfile=async (req,res)=>{
         const userDetails=await User.findById({_id:userId});
         const profileid=userDetails.additionalDetails;
         const profileDetails=await Profile.findById({_id:profileid});
+
+        const user=await User.findByIdAndUpdate(userId,{firstName:firstName,lastName:lastName},{new:true});
 
         profileDetails.gender=gender;        
         profileDetails.dateofBirth=dateOfBirth;        
@@ -68,13 +72,17 @@ exports.deleteAccount=async(req,res)=>{
             })
         }
 
-        const profile=await Profile.findByIdAndDelete({_id:userExist.additionalDetails});
+        await Profile.findByIdAndDelete({_id:new mongoose.Types.ObjectId(userExist.additionalDetails)});
         // await Course.findByIdAndDelete({})
         // hw to detele course s
-        const allEnrolledCourses=await User.findById({_id:userId}).select("courses");
-        allEnrolledCourses.courses.forEach(async (element) => {
-            await Course.findByIdAndUpdate({_id:element},{$pull:{studentEnrolled:userId}})
-        });
+        // const allEnrolledCourses=await User.findById({_id:userId}).select("courses");
+        // allEnrolledCourses.courses.forEach(async (element) => {
+        //     await Course.findByIdAndUpdate({_id:element},{$pull:{studentEnrolled:userId}})
+        // });
+
+        for(const courseId of userExist.courses){
+            const course=await Course.findOneAndUpdate(courseId,{$pull:{studentEnrolled:userId}},{new:true});
+        }
         await User.findByIdAndDelete({_id:userId});
         return res.status(200).json({
             success:true,
@@ -123,7 +131,6 @@ exports.updateDisplayPicture=async (req,res)=>{
                 message:"no file were uploaded"
             })
         }
-        console.log(req.files)
         const displayPicture=req.files.displayPicture;
         const userId=req.user.id;
         const image=await uploadImageToCloud(displayPicture,process.env.FOLDER_NAME,1000,1000)
@@ -147,8 +154,38 @@ exports.updateDisplayPicture=async (req,res)=>{
 exports.getEnrolledCourses=async (req,res)=>{
     try {
         const userId=req.user.id;
-        const allCourses=await User.findOne({_id:userId}).populate("courses").select("courses").exec();
 
+        const userDetails=await User.findOne({_id:userId}).populate({
+            path:"courses",
+            populate:{
+                path:"courseContent",
+                populate:{
+                    path:"subSection"
+                }
+            }
+        }).exec();
+
+        userDetails=userDetails.toObject();
+        userDetails?.courses?.forEach(async (course)=>{
+            let totalDurationInSeconds=0;
+            let subSectionlength=0;
+            course?.courseContent?.forEach((section)=>{
+                section?.subSection?.forEach((subsection)=>{
+                    totalDurationInSeconds+=parseInt(subsection?.timeDuration);
+                })
+                subSectionlength+=section?.subSection?.length;
+            })
+            course.totalDuration=convertSecondsToDuration(totalDurationInSeconds);
+
+            let courseProgressCount=await CourseProgress.findOne({courseId:course._id,userId:userId})
+            courseProgressCount=courseProgressCount.completedVideos.length;
+            if(subSectionlength===0){
+                course.progressPercentage=100;
+            }else{
+                let multiplier=Math.pow(10,2);
+                course.progressPercentage=Math.round((courseProgressCount/subSectionlength)*100*multiplier)/multiplier
+            }
+        })
         if(!allCourses){
             return res.status(400).json({
                 success:false,
@@ -159,8 +196,9 @@ exports.getEnrolledCourses=async (req,res)=>{
         return res.status(200).json({
             success:true,
             message:"enrolled courses fetched successfully",
-            data:allCourses
+            data:userDetails.courses,
         })
+        
     } catch (error) {
         return res.status(500).json({
             success: false,
