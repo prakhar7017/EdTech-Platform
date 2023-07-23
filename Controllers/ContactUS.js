@@ -1,7 +1,8 @@
 const mailSender=require(".././util/mailSender")
+const constactUsEmail=require("../mail/templates/contactFormRes");
 
 exports.ContactUS=async(req,res)=>{
-    const {firstname,lastname="",email,phoneNo,message}=req.body;
+    const {firstname,lastname="",email,phoneNo,message,countryCode}=req.body;
 
     if(!firstname || !email || !phoneNo || !message){
         return res.status(400).json({
@@ -10,7 +11,7 @@ exports.ContactUS=async(req,res)=>{
         })
     }
 
-    const mailSendtoemail=await mailSender(email,"Acknowledgement","Thanks for contacting us our Support will contact you shortly")
+    const mailSendtoemail=await mailSender(email,"Acknowledgement",constactUsEmail(email,firstname,lastname,message,phoneNo,countryCode))
 
     if(!mailSendtoemail){
         return res.status(400).json({
