@@ -5,7 +5,7 @@ const otpGenerator = require('otp-generator');
 const bcrypt=require("bcrypt"); 
 const jwt=require("jsonwebtoken");
 const Profile = require("../Models/Profile");
-const upadatePassword=require("../mail/templates/passwordUpdate");
+const {passwordUpdated}=require("../mail/templates/passwordUpdate");
 
 // sendOTP
 exports.sendOTP=async(req,res)=>{
@@ -92,7 +92,7 @@ exports.postSignup=async (req,res)=>{
     }
     // find most recent otp
     const recentOtp=await OTP.findOne({email}).sort({createdAt:-1}).limit(1);
-    console.log(recentOtp);
+    // console.log(recentOtp);
     // validate otp
     if(recentOtp.otp!=otp){
         return res.status(400).json({
@@ -134,7 +134,7 @@ exports.postSignup=async (req,res)=>{
         user
     })
    } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(500).json({
         success:false,
         message:"Internal Server Error",
@@ -192,7 +192,7 @@ exports.postLogin=async(req,res)=>{
             message:"logged in Successfully"
         })
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         return res.status(500).json({
             success:false,
             message:"Internal Server Error"
@@ -223,7 +223,7 @@ exports.postChangePassword=async(req,res)=>{
         const newHashPassword=await bcrypt.hash(newPassword,10);
         const updatedUser=await User.findByIdAndUpdate(req.user.id,{$set:{password:newHashPassword}},{new:true});
 
-        const emailResponse=await mailSender(prevUser.email,"Password Changed Successfully",upadatePassword(updatedUser.email,`Password updated for ${updatedUser.firstName} ${updatedUser.lastName}`))
+        const emailResponse=await mailSender(prevUser.email,"Password Changed Successfully",passwordUpdated(updatedUser.email,`Password updated for ${updatedUser.firstName} ${updatedUser.lastName}`))
         
         if(!emailResponse){
             return res.status(400).json({
@@ -239,7 +239,7 @@ exports.postChangePassword=async(req,res)=>{
         })
 
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         return res.status(500).json({
             success:false,
             message:"Internal Server Error"

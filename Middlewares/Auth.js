@@ -6,7 +6,7 @@ const User=require("../Models/Users");
 exports.isAuthenticated=async (req,res,next)=>{
     try {       
         const token= req.cookies.token || req.body.token || req.get("Authorization").replace("Bearer ","");
-        console.log("backend token",token)
+        // console.log("backend token",token)
         if(!token){
             return res.status(401).json({
                 success:false,
@@ -16,7 +16,7 @@ exports.isAuthenticated=async (req,res,next)=>{
         try {
             // console.log("hiii")
             const decode=jwt.verify(token,process.env.JWT_SECRET);
-            console.log(decode);
+            // console.log(decode);
             req.user=decode;
         } catch (error) {
             return res.status(401).json({

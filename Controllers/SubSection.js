@@ -5,7 +5,7 @@ const uplodeToCloudinary=require("../util/imageUploder");
 exports.createSubSection=async (req,res)=>{
     try {
         const {title,description,sectionId}=req.body;
-        console.log(title,description,sectionId);
+        // console.log(title,description,sectionId);
 
         const video=req.files.video;
 
@@ -33,7 +33,7 @@ exports.createSubSection=async (req,res)=>{
             data:updateSection
         })
     } catch (error) {
-      console.log(error)
+      // console.log(error)
         return res.status(500).json({
             success:false,
             message:"Unable to add SubSection"
@@ -112,7 +112,7 @@ exports.deleteSubSection=async(req,res)=>{
           message: "SubSection deleted successfully",
         })
       } catch (error) {
-        console.error(error)
+        // console.error(error)
         return res.status(500).json({
           success: false,
           message: "An error occurred while deleting the SubSection",

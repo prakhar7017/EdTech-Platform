@@ -4,8 +4,10 @@ const SubSection = require("../Models/SubSections");
 exports.updateCourseProgress=async(req,res)=>{
 
     const {courseId,subSectionId}=req.body;
+    // console.log(courseId,subSectionId)
 
     const userId=req.user.id;
+    // console.log("user->",userId);
 
     try {
         const subSection=await SubSection.findById(subSectionId);
@@ -15,11 +17,13 @@ exports.updateCourseProgress=async(req,res)=>{
                 message:"SubSection Not Found "
             })
         }
+        // console.log("subsection->",subSection)
         //check for old entry
         let courseProgress=await CourseProgress.findOne({
             courseId:courseId,
             userId:userId
         })
+        // console.log("courseP->",courseProgress)
         if(!courseProgress){
             return res.status(404).json({
                 success:false,
