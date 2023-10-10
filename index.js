@@ -29,9 +29,9 @@ app.use(
 
 app.use(Routes);
 
+db.connect();
+Cloudinary.cloudinaryConnect();
 
 app.listen(PORT,()=>{
-    db.connect();
-    Cloudinary.cloudinaryConnect();
     // console.log(`Server has Started Running on ${PORT}`);
 })
