@@ -8,8 +8,9 @@ exports.cloudinaryConnect=()=>{
             api_secret:process.env.API_SECRET,
             secure:true
          })
-         console.log("cloudinary connected")
+        //  console.log("cloudinary connected")
     } catch (error) {
-        console.log("error in cloudinary");
+        throw Error(error.message)
+        // console.log("error in cloudinary");
     }
 }
