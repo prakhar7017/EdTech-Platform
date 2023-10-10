@@ -25,7 +25,7 @@ if (cluster.isPrimary) {
   app.use(cookieParser());
   app.use(
     cors({
-      origin: "http://localhost:3000",
+      origin: "https://ed-tech-platform-frontend-n1ysptjwz-prakhar7017.vercel.app/",
       credentials: true,
     })
   );
