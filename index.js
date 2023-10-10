@@ -35,6 +35,14 @@ if (cluster.isPrimary) {
       tempFileDir: "/tmp/",
     })
   );
+  
+  app.use("/",(req,res)=>{
+    res.status(200).json({
+      status:"success",
+      message:"Backend is on"
+    })
+  })
+
   app.use(Routes);
 
   app.listen(PORT, () => {
