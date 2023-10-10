@@ -36,11 +36,12 @@ if (cluster.isPrimary) {
     })
   );
   
-  app.use("/",(req,res)=>{
+  app.use("/",(req,res,next)=>{
     res.status(200).json({
       status:"success",
       message:"Backend is on"
     })
+    next();
   })
 
   app.use(Routes);
