@@ -17,7 +17,8 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin:"https://ed-tech-platform-frontend-n1ysptjwz-prakhar7017.vercel.app/",
+    origin:"*",
+    methods: ["GET", "POST"],
     credentials:true,
 }))
 app.use(
