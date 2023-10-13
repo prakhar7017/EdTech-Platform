@@ -23,7 +23,7 @@ exports.resetPasswordToken=async (req,res)=>{
 
         const updatedUser=await User.findOneAndUpdate({email},{token:token,resetPasswordExpire:Date.now()+5*60*1000},{new:true});
 
-        const url=`https://studynotion-backend-tlxx.onrender.com/update-password/${token}`;
+        const url=`https://ed-tech-platform-frontend.vercel.app/update-password/${token}`;
 
         await mailSender(email,"Password Reset Link",`Here is the Link:${url}`)
 
