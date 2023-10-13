@@ -30,6 +30,14 @@ app.use(
 
 app.use(Routes);
 
+app.get("/",(req,res,)=>{
+    res.status(200).json({
+      status:"success",
+      message:"Backend is on"
+    })
+  })
+
+
 db.connect();
 Cloudinary.cloudinaryConnect();
 
