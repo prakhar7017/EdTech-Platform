@@ -23,7 +23,7 @@ exports.resetPasswordToken=async (req,res)=>{
 
         const updatedUser=await User.findOneAndUpdate({email},{token:token,resetPasswordExpire:Date.now()+5*60*1000},{new:true});
 
-        const url=`http://localhost:3000/update-password/${token}`;
+        const url=`https://studynotion-backend-tlxx.onrender.com/update-password/${token}`;
 
         await mailSender(email,"Password Reset Link",`Here is the Link:${url}`)
 
@@ -33,7 +33,7 @@ exports.resetPasswordToken=async (req,res)=>{
             updatedUser
         })
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         res.status(500).json({
             success:false,
             message:"Internal Server Error"
@@ -83,7 +83,7 @@ exports.resetPassword=async(req,res)=>{
             updatedUser
         })
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         return res.status(500).json({
             success:false,
             message:"Internal Server Error"

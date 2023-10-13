@@ -6,6 +6,7 @@ const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const Profile = require("../Models/Profile");
 const {passwordUpdated}=require("../mail/templates/passwordUpdate");
+const {otpTemplate}=require("../mail/templates/emailVerificationTemplate");
 
 // sendOTP
 exports.sendOTP=async(req,res)=>{
@@ -48,6 +49,8 @@ exports.sendOTP=async(req,res)=>{
             email,
             otp,
         })
+
+        await mailSender(email,"Verification",otpTemplate(otp))
 
         res.status(200).json({
             success:true,

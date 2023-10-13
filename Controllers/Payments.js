@@ -69,7 +69,7 @@ exports.capturePayment=async (req,res)=>{
             data:paymentResponse
         })
     } catch (error) {
-        console.log(error); 
+        // console.log(error); 
         return res.status(500).json({
             success:false,
             message:"Could not Initiate Order"
@@ -168,7 +168,7 @@ exports.sendPaymentSuccessEmail=async(req,res)=>{
     try {
         const enrolledStudent=await User.findById(userId)
 
-        await mailSender(enrolledStudent.email,paymentSuccessEmail(`${enrolledStudent.firstName}`,amount/100,orderId,paymentId));
+        await mailSender(enrolledStudent.email,"Payment Successfull",paymentSuccessEmail(`${enrolledStudent.firstName}`,amount/100,orderId,paymentId));
 
         return res.status(200).json({
             success:true,
