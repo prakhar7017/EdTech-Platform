@@ -23,12 +23,11 @@ if (cluster.isPrimary) {
   app.use(morgan("dev"));
   app.use(express.json());
   app.use(cookieParser());
-  app.use(
-    cors({
-      origin: "https://ed-tech-platform-frontend-n1ysptjwz-prakhar7017.vercel.app/",
-      credentials: true,
-    })
-  );
+  app.use(cors({
+    origin:"*",
+    methods: ["GET", "POST"],
+    credentials:true,
+}))
   app.use(
     fileUpload({
       useTempFiles: true,
@@ -36,13 +35,13 @@ if (cluster.isPrimary) {
     })
   );
   
-  // app.use("/",(req,res,next)=>{
-  //   res.status(200).json({
-  //     status:"success",
-  //     message:"Backend is on"
-  //   })
-  //   next();
-  // })
+  app.use("/",(req,res,next)=>{
+    res.status(200).json({
+      status:"success",
+      message:"Backend is on"
+    })
+    next();
+  })
 
   app.use(Routes);
 
